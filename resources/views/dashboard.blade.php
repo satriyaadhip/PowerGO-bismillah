@@ -22,59 +22,53 @@
 </head>
 
 <body class="bg-[#E1DFEC] text-gray-900 font-sans">
-    <header class="py-4">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <!-- Left: Logo and Desktop Navigation -->
-            <div class="flex items-center gap-4">
-                <a href="/">
-                    <h1 class="text-xl font-medium">Power<span class="font-black">GO</span></h1>
-                </a>
-                <!-- Desktop Navigation (next to logo) -->
-                <nav class="hidden sm:block">
-                    <ul class="flex gap-2">
-                        <li>
-                            <a href="/Dashboard"
-                                class="ml-4 group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
-                   {{ request()->is('Dashboard') ? 'font-bold shadow-md bg-white' : '' }}">
-                                <span
-                                    class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
-                                <img src="{{ asset('images/button_home.png') }}" alt="Dashboard" class="w-5 h-5 mr-2">
-                                <span
-                                    class="{{ request()->is('Dashboard') ? 'font-bold' : 'group-hover:font-bold' }}">Dashboard</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/Pembayaran"
-                                class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
-                   {{ request()->is('Pembayaran') ? 'font-bold shadow-md bg-white' : '' }}">
-                                <span
-                                    class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
-                                <img src="{{ asset('images/button_pembayaran.png') }}" alt="Pembayaran"
-                                    class="w-5 h-5 mr-2">
-                                <span
-                                    class="{{ request()->is('Pembayaran') ? 'font-bold' : 'group-hover:font-bold' }}">Pembayaran</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/Riwayat"
-                                class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
-                   {{ request()->is('Riwayat') ? 'font-bold shadow-md bg-white' : '' }}">
-                                <span
-                                    class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
-                                <img src="{{ asset('images/button_transaksi.png') }}" alt="Riwayat" class="w-5 h-5 mr-2">
-                                <span
-                                    class="{{ request()->is('Riwayat') ? 'font-bold' : 'group-hover:font-bold' }}">Riwayat</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <!-- Right: Profile -->
-            <div class="flex items-center gap-2">
-                <div>profile</div>
+    <!-- Sidebar -->
+    <div class="fixed left-6 top-6 bottom-6 w-64 rounded-2xl shadow-2xl bg-gradient-to-br from-[#8EE2D3] to-[#66A3A8] flex flex-col justify-between p-4 text-black z-40">
+        <!-- Logo -->
+        <div>
+            <h1 class="text-2xl font-bold mb-8 text-black">PowerGO</h1>
+            <!-- Menu -->
+            <ul class="space-y-4">
+                <li>
+                    <a href="/Dashboard"
+                       class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold text-black {{ request()->is('Dashboard') ? 'font-bold shadow-md bg-white/20' : '' }} hover:bg-white/10">
+                        <span class="absolute inset-0 rounded-[30px] bg-white/20 opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
+                        <img src="{{ asset('images/button_home.png') }}" alt="Dashboard" class="w-5 h-5 mr-2">
+                        <span class="{{ request()->is('Dashboard') ? 'font-bold text-black' : 'group-hover:font-bold' }}">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Pembayaran"
+                       class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold text-black {{ request()->is('Pembayaran') ? 'font-bold shadow-md bg-white/20' : '' }} hover:bg-white/10">
+                        <span class="absolute inset-0 rounded-[30px] bg-white/20 opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
+                        <img src="{{ asset('images/button_pembayaran.png') }}" alt="Pembayaran" class="w-5 h-5 mr-2">
+                        <span class="{{ request()->is('Pembayaran') ? 'font-bold text-black' : 'group-hover:font-bold' }}">Pembayaran</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Riwayat"
+                       class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold text-black {{ request()->is('Riwayat') ? 'font-bold shadow-md bg-white/20' : '' }} hover:bg-white/10">
+                        <span class="absolute inset-0 rounded-[30px] bg-white/20 opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
+                        <img src="{{ asset('images/button_transaksi.png') }}" alt="Riwayat" class="w-5 h-5 mr-2">
+                        <span class="{{ request()->is('Riwayat') ? 'font-bold text-black' : 'group-hover:font-bold' }}">Riwayat</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- Profile -->
+        <div class="flex items-center space-x-3 bg-white/20 rounded-xl p-3">
+            <img
+                src="/profile.png"
+                alt="Profile"
+                class="w-12 h-12 rounded-full border-2 border-white"
+            />
+            <div>
+                <p class="font-semibold text-black">Aditya Juliawan</p>
+                <p class="text-sm text-black">Selamat siang!</p>
             </div>
         </div>
-    </header>
+    </div>
+
     <main class="container mx-auto mt-4 px-2 sm:px-4">
         <div class="flex flex-col md:flex-row gap-4 justify-center items-stretch">
             <!-- Left Column -->
