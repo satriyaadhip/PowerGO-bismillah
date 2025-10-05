@@ -112,31 +112,7 @@
         </div>
     </main>
     <!-- Mobile Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg sm:hidden z-50">
-        <ul class="flex justify-around items-center py-2">
-            <li>
-                <a href="/Dashboard"
-                    class="flex flex-col items-center text-xs {{ request()->is('Dashboard') ? 'font-bold text-yellow-500' : 'text-gray-500' }}">
-                    <img src="{{ asset('images/button_home.png') }}" alt="Dashboard" class="w-6 h-6 mb-1">
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="/Pembayaran"
-                    class="flex flex-col items-center text-xs {{ request()->is('Pembayaran') ? 'font-bold text-yellow-500' : 'text-gray-500' }}">
-                    <img src="{{ asset('images/button_pembayaran.png') }}" alt="Pembayaran" class="w-6 h-6 mb-1">
-                    Pembayaran
-                </a>
-            </li>
-            <li>
-                <a href="/Riwayat"
-                    class="flex flex-col items-center text-xs {{ request()->is('Riwayat') ? 'font-bold text-yellow-500' : 'text-gray-500' }}">
-                    <img src="{{ asset('images/button_transaksi.png') }}" alt="Riwayat" class="w-6 h-6 mb-1">
-                    Riwayat
-                </a>
-            </li>
-        </ul>
-    </nav>
+    <x-bottom-navigation />
     {{-- <footer class="mt-10 py-6 bg-white text-center shadow-md">
         <p class="text-gray-600">&copy; 2025 Brand. All rights reserved.</p>
     </footer> --}}

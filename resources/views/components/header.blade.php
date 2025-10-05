@@ -1,4 +1,4 @@
-<div>
+<div class="sticky top-0 z-50 bg-[#E1DFEC]">
     <header class="py-4">
         <div class="container mx-auto flex justify-between items-center px-4">
             <!-- Left: Logo and Desktop Navigation -->
