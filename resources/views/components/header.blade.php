@@ -1,17 +1,17 @@
 <div class="sticky top-0 z-50 bg-[#E1DFEC]">
-    <header class="py-4">
-        <div class="container mx-auto flex justify-between items-center px-4">
+    <header class="p-6">
+        <div class="mx-auto flex justify-between items-center">
             <!-- Left: Logo and Desktop Navigation -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 px-4">
                 <a href="/">
-                    <h1 class="text-xl font-medium">Power<span class="font-black">GO</span></h1>
+                    <h1 class="text-2xl font-medium">Power<span class="font-black">GO</span></h1>
                 </a>
                 <!-- Desktop Navigation (next to logo) -->
                 <nav class="hidden sm:block">
-                    <ul class="flex gap-2">
+                    <ul class="flex">
                         <li>
                             <a href="/dashboard"
-                                class="ml-4 group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
+                                class="ml-4 group relative flex items-center p-4 rounded-[30px] transition-all font-semibold
                    {{ request()->is('dashboard') ? 'font-bold shadow-md bg-white' : '' }}">
                                 <span
                                     class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
@@ -22,7 +22,7 @@
                         </li>
                         <li>
                             <a href="/pembayaran"
-                                class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
+                                class="group relative flex items-center p-4 rounded-[30px] transition-all font-semibold
                    {{ request()->is('pembayaran') ? 'font-bold shadow-md bg-white' : '' }}">
                                 <span
                                     class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
@@ -34,7 +34,7 @@
                         </li>
                         <li>
                             <a href="/riwayat"
-                                class="group relative flex items-center px-4 py-2 rounded-[30px] transition-all font-semibold
+                                class="group relative flex items-center p-4 rounded-[30px] transition-all font-semibold
                    {{ request()->is('riwayat') ? 'font-bold shadow-md bg-white' : '' }}">
                                 <span
                                     class="absolute inset-0 rounded-[30px] bg-white opacity-0 group-hover:opacity-100 group-hover:shadow-md transition-all -z-10"></span>
