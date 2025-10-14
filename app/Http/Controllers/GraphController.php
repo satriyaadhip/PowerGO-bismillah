@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class GraphController extends Controller
 {
-    public function sisaKwh()
+    public function totalDaya()
     {
         // Data Harian (24 Jam) - contoh data dummy
         $hourlyData = collect([
@@ -62,7 +62,7 @@ class GraphController extends Controller
         $weeklyChartKwh = [12.5, 14.2, 11.8, 15.6, 13.9, 16.3, 14.7];
         $weeklyChartCost = [171875, 195250, 162250, 214500, 191125, 224125, 202125];
 
-        return view('dashboard.sisa-kwh', compact(
+        return view('dashboard.total_daya', compact(
             'hourlyData',
             'totalKwh',
             'totalCost',

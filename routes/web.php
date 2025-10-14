@@ -15,11 +15,11 @@ Route::get('/pembayaran', function() {
 Route::get('/riwayat', function() {
     return view('riwayat.riwayat');
 });
-Route::get('/dashboard/total-daya', function() {
-    return view('dashboard.total-daya');
+Route::get('/dashboard/total_daya', function() {
+    return view('dashboard.total_daya');
 });
-Route::get('/dashboard/sisa-kwh', function() {
-    return view('dashboard.sisa-kwh');
+Route::get('/dashboard/sisa_kwh', function() {
+    return view('dashboard.sisa_kwh');
 });
 Route::get('/riwayat', function() {
     return view('riwayat.riwayat');
@@ -28,4 +28,4 @@ Route::get('/about', function() {
     return view('about');
 });
 
-Route::get('/dashboard/sisa-kwh', [GraphController::class, 'sisaKwh']);
+Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya']);

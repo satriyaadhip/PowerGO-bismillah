@@ -95,7 +95,7 @@
     </script>
 </head>
 
-<!-- <body class="bg-[#E1DFEC] text-gray-900 font-sans"> -->
+<body class="bg-[#E1DFEC] text-gray-900 font-sans">
 
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
@@ -233,7 +233,7 @@
         // Chart 24 Jam
         const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
         new Chart(hourlyCtx, {
-            type: 'line', 
+            type: 'line',
             data: {
                 labels: hourlyChartLabels,
                 datasets: [{
@@ -345,4 +345,5 @@
         });
     </script>
 
+</body>
 </html>
