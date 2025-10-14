@@ -24,7 +24,7 @@
             apiKey: "your-api-key",
             authDomain: "your-project.firebaseapp.com",
             projectId: "powergo-bismillah",
-            databaseURL: "https://powergo-bismillah-default-rtdb.firebaseio.com/",
+            databaseURL: ENV('FIREBASE_DATABASE_URL'),
             storageBucket: "your-project.appspot.com",
             messagingSenderId: "123456789",
             appId: "your-app-id"
@@ -99,8 +99,9 @@
 
 <body class="bg-[#E1DFEC] text-gray-900 font-sans">
     <x-header />
+    <x-tab-navigation-home />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
-        <div class="container mx-auto flex flex-col md:flex-row gap-4 py-4">
+        <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
             <!-- Left Column -->
             <div class="bg-[#d5dbea] shadow-sm rounded-3xl p-4 sm:p-4 flex-1">
                 <h2 class="text-lg font-semibold text-gray-800 mb-2">Penggunaan energi</h2>
