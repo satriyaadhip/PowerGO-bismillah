@@ -233,7 +233,7 @@
         // Chart 24 Jam
         const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
         new Chart(hourlyCtx, {
-            type: 'line', 
+            type: 'line',
             data: {
                 labels: hourlyChartLabels,
                 datasets: [{

@@ -1,5 +1,4 @@
-<div class="container sm:px-4">
-    <div class="flex gap-2">
+    <div class="container mx-auto flex flex-row gap-2">
         <a href="/dashboard" 
            class="group relative flex items-center px-4 py-2 rounded-full transition-all font-semibold
            {{ request()->is('dashboard') ? 'bg-white shadow-sm' : 'bg-gray-300 text-gray-700' }}">
@@ -21,4 +20,3 @@
             <span class="{{ request()->routeIs('dashboard.sisa-kwh') ? 'font-bold' : 'group-hover:font-bold' }}">Sisa kWh</span>
         </a>
     </div>
-</div>
