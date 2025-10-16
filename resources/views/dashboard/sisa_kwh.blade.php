@@ -95,15 +95,113 @@
     </script>
 </head>
 
-<!-- <body class="bg-[#E1DFEC] text-gray-900 font-sans"> -->
+<body class="bg-[#000000] text-gray-900 font-sans">
 
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
     <x-tab-navigation-home />
         <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
+    
+            <!-- Left: Data Harian (24 Jam) -->
+            <div class="flex-1">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Data Harian Penggunaan Listrik</h2>
+    
+                <!-- Line Chart Harian -->
+                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan Listrik (24 Jam)</h3>
+                    <div class="relative w-full h-[300px]">
+                        <canvas id="hourly-chart"></canvas>
+                    </div>
+                </div>
+    
+                <!-- Tabel Harian -->
+                <div class="bg-white rounded-3xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Penggunaan Per Jam</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-4 font-bold text-gray-700">Waktu</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Sisa kWh</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Penggunaan kWh</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Biaya (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($hourlyKwh as $data)
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data['remaining_kwh'] }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['kwh'], 2) }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['cost'], 0, ',', '.') }}</td>
+                                </tr>
+                                @endforeach
+                                <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
+                                    <td class="py-4 px-4 text-gray-900">Total</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">-</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($totalKwh, 2) }}</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($totalCost, 0, ',', '.') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Right: Data 7 Hari Terakhir -->
 
         </div>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Data dari Laravel Controller
+        const hourlyChartLabels = @json($hourlyChartLabels);
+        const hourlyChartData = @json($hourlyChartData);
+    
+        // Chart 24 Jam
+        const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
+        new Chart(hourlyCtx, {
+            type: 'line',
+            data: {
+                labels: hourlyChartLabels,
+                datasets: [{
+                    label: 'kWh',
+                    data: hourlyChartData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Sisa kWh'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
-
+</body>
 </html>

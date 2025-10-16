@@ -95,7 +95,7 @@
     </script>
 </head>
 
-<body class="bg-[#E1DFEC] text-gray-900 font-sans">
+<body class="bg-[#000000] text-gray-900 font-sans">
 
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
@@ -108,7 +108,7 @@
     
                 <!-- Line Chart Harian -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan Daya (24 Jam)</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan Dayaaa (24 Jam)</h3>
                     <div class="relative w-full h-[300px]">
                         <canvas id="hourly-chart"></canvas>
                     </div>
@@ -166,7 +166,7 @@
                     </div>
                     <div class="bg-white rounded-2xl shadow-md p-4">
                         <p class="text-xs text-gray-600 mb-1">Total Biaya</p>
-                        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($weeklyTotalCost, 0, ',', '.') }}</p>
+                        <p class="text-2xl font-bold text-gray-900">Rp{{ number_format($weeklyTotalCost, 0, ',', '.') }}</p>
                         <p class="text-xs text-gray-500 mt-1">7 hari</p>
                     </div>
                     <div class="bg-white rounded-2xl shadow-md p-4">

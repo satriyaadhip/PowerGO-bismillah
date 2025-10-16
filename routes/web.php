@@ -29,3 +29,4 @@ Route::get('/about', function() {
 });
 
 Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya']);
+Route::get('/dashboard/sisa_kwh', [GraphController::class, 'sisaKwh']);
