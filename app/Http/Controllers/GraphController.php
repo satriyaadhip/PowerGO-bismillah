@@ -38,7 +38,7 @@ class GraphController extends Controller
 
         $totalKwh = $hourlyData->sum('kwh');
         $totalCost = $hourlyData->sum('cost');
-        
+
         $hourlyChartLabels = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
         $hourlyChartData = [120, 80, 60, 150, 280, 320, 450, 380, 340, 520, 480, 280];
 
@@ -158,6 +158,196 @@ $data = [
             'weeklyChartLabels',
             'weeklyChartKwh',
             'weeklyChartCost'
+        ));
+    }
+
+    public function sisaKwh()
+    {
+        $hourlyKwh = collect([
+            [
+                'time' => '00:00 - 01:00',
+                'remaining_kwh' => 39.0,
+                'kwh' => 1.2,
+                'cost' => 1.2 * 13750,
+            ],
+            [
+                'time' => '01:00 - 02:00',
+                'remaining_kwh' => 37.8,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '02:00 - 03:00',
+                'remaining_kwh' => 37.1,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '03:00 - 04:00',
+                'remaining_kwh' => 36.3,
+                'kwh' => 0.4,
+                'cost' => 0.4 * 13750,
+            ],
+            [
+                'time' => '04:00 - 05:00',
+                'remaining_kwh' => 35.9,
+                'kwh' => 0.6,
+                'cost' => 0.6 * 13750,
+            ],
+            [
+                'time' => '05:00 - 06:00',
+                'remaining_kwh' => 35.3,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '06:00 - 07:00',
+                'remaining_kwh' => 34.6,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '07:00 - 08:00',
+                'remaining_kwh' => 33.8,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '08:00 - 09:00',
+                'remaining_kwh' => 33.1,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '09:00 - 10:00',
+                'remaining_kwh' => 32.3,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '10:00 - 11:00',
+                'remaining_kwh' => 31.6,
+                'kwh' => 0.6,
+                'cost' => 0.6 * 13750,
+            ],
+            [
+                'time' => '11:00 - 12:00',
+                'remaining_kwh' => 31.0,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '12:00 - 13:00',
+                'remaining_kwh' => 30.2,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '13:00 - 14:00',
+                'remaining_kwh' => 29.5,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '14:00 - 15:00',
+                'remaining_kwh' => 28.7,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '15:00 - 16:00',
+                'remaining_kwh' => 28.0,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '16:00 - 17:00',
+                'remaining_kwh' => 27.3,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '17:00 - 18:00',
+                'remaining_kwh' => 26.5,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '18:00 - 19:00',
+                'remaining_kwh' => 25.8,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '19:00 - 20:00',
+                'remaining_kwh' => 25.0,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '20:00 - 21:00',
+                'remaining_kwh' => 24.3,
+                'kwh' => 0.8,
+                'cost' => 0.8 * 13750,
+            ],
+            [
+                'time' => '21:00 - 22:00',
+                'remaining_kwh' => 23.5,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '22:00 - 23:00',
+                'remaining_kwh' => 22.8,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+            [
+                'time' => '23:00 - 00:00',
+                'remaining_kwh' => 22.1,
+                'kwh' => 0.7,
+                'cost' => 0.7 * 13750,
+            ],
+        ])->map(function ($item) {
+            $item['cost'] = round($item['kwh'] * 13750);
+            return $item;
+        });
+
+        $totalKwh = $hourlyKwh->sum('kwh');
+        $totalCost = $hourlyKwh->sum('cost');
+
+        $hourlyChartLabels = $hourlyKwh->pluck('time')->toArray();
+        $hourlyChartData = $hourlyKwh->pluck('remaining_kwh')->toArray();
+
+        // Format data untuk grafik dan sisa kWh
+        $data = [
+            'labels' => $hourlyKwh->pluck('date'),
+            'datasets' => [
+                [
+                    'label' => 'Konsumsi (kWh)',
+                    'data' => $hourlyKwh->pluck('kwh'),
+                    'borderColor' => '#3b82f6',
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                ],
+                [
+                    'label' => 'Sisa kWh',
+                    'data' => $hourlyKwh->pluck('remaining_kwh'),
+                    'borderColor' => '#facc15', // kuning
+                    'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
+                    'fill' => false,
+                    'tension' => 0.4,
+                ],
+            ],
+        ];
+
+        return view('dashboard.sisa_kwh', compact(
+            'hourlyKwh',
+            'totalKwh',
+            'totalCost',
+            'hourlyChartLabels',
+            'hourlyChartData'
         ));
     }
 }
