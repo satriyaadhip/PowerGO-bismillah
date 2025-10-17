@@ -130,10 +130,10 @@
                             <tbody>
                                 @foreach($hourlyData as $data)
                                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td class="py-3 px-4 text-gray-900">{{ $data->time }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data->watt }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data->kwh, 2) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data->cost, 0, ',', '.') }}</td>
+                                    <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data['watt'] }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['kwh'], 2) }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['cost'], 0, ',', '.') }}</td>
                                 </tr>
                                 @endforeach
                                 <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
@@ -200,10 +200,10 @@
                             <tbody>
                                 @foreach($weeklyData as $data)
                                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td class="py-3 px-4 text-gray-900">{{ $data->date }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data->avg_watt, 0) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data->kwh, 2) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data->cost, 0, ',', '.') }}</td>
+                                    <td class="py-3 px-4 text-gray-900">{{ $data['date'] }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data['avg_watt'], 0) }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data['kwh'], 2) }}</td>
+                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['cost'], 0, ',', '.') }}</td>
                                 </tr>
                                 @endforeach
                                 <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">

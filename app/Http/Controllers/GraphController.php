@@ -34,7 +34,7 @@ class GraphController extends Controller
             ['time' => '21:00 - 22:00', 'watt' => 350, 'kwh' => 0.35, 'cost' => 4813],
             ['time' => '22:00 - 23:00', 'watt' => 280, 'kwh' => 0.28, 'cost' => 3850],
             ['time' => '23:00 - 00:00', 'watt' => 200, 'kwh' => 0.20, 'cost' => 2750],
-        ])->map(fn($item) => (object) $item);
+        ]);
 
         $totalKwh = $hourlyData->sum('kwh');
         $totalCost = $hourlyData->sum('cost');
@@ -51,7 +51,7 @@ class GraphController extends Controller
             ['date' => 'Jumat, 17 Oktober 2025', 'avg_watt' => 579, 'kwh' => 13.9, 'cost' => 191125],
             ['date' => 'Sabtu, 18 Oktober 2025', 'avg_watt' => 679, 'kwh' => 16.3, 'cost' => 224125],
             ['date' => 'Minggu, 19 Oktober 2025', 'avg_watt' => 613, 'kwh' => 14.7, 'cost' => 202125],
-        ])->map(fn($item) => (object) $item);
+        ]);
 
         $weeklyTotalKwh = $weeklyData->sum('kwh');
         $weeklyTotalCost = $weeklyData->sum('cost');
@@ -61,16 +61,6 @@ class GraphController extends Controller
         $weeklyChartLabels = ['Sen, 13 Okt', 'Sel, 14 Okt', 'Rab, 15 Okt', 'Kam, 16 Okt', 'Jum, 17 Okt', 'Sab, 18 Okt', 'Min, 19 Okt'];
         $weeklyChartKwh = [12.5, 14.2, 11.8, 15.6, 13.9, 16.3, 14.7];
         $weeklyChartCost = [171875, 195250, 162250, 214500, 191125, 224125, 202125];
-
-               $weeklyData = collect([
-            ['date' => 'Sen, 13 Okt', 'kwh' => 12.5, 'remaining_kwh' => 39.0],
-            ['date' => 'Sel, 14 Okt', 'kwh' => 14.2, 'remaining_kwh' => 37.3],
-            ['date' => 'Rab, 15 Okt', 'kwh' => 11.8, 'remaining_kwh' => 36.0],
-            ['date' => 'Kam, 16 Okt', 'kwh' => 15.6, 'remaining_kwh' => 34.1],
-            ['date' => 'Jum, 17 Okt', 'kwh' => 13.9, 'remaining_kwh' => 32.8],
-            ['date' => 'Sab, 18 Okt', 'kwh' => 16.3, 'remaining_kwh' => 31.2],
-            ['date' => 'Min, 19 Okt', 'kwh' => 14.7, 'remaining_kwh' => 30.0],
-        ]);
 
         // Format data untuk grafik dan sisa kWh
         $data = [
