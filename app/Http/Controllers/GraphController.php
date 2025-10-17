@@ -62,12 +62,94 @@ class GraphController extends Controller
         $weeklyChartKwh = [12.5, 14.2, 11.8, 15.6, 13.9, 16.3, 14.7];
         $weeklyChartCost = [171875, 195250, 162250, 214500, 191125, 224125, 202125];
 
+               $weeklyData = collect([
+            ['date' => 'Sen, 13 Okt', 'kwh' => 12.5, 'remaining_kwh' => 39.0],
+            ['date' => 'Sel, 14 Okt', 'kwh' => 14.2, 'remaining_kwh' => 37.3],
+            ['date' => 'Rab, 15 Okt', 'kwh' => 11.8, 'remaining_kwh' => 36.0],
+            ['date' => 'Kam, 16 Okt', 'kwh' => 15.6, 'remaining_kwh' => 34.1],
+            ['date' => 'Jum, 17 Okt', 'kwh' => 13.9, 'remaining_kwh' => 32.8],
+            ['date' => 'Sab, 18 Okt', 'kwh' => 16.3, 'remaining_kwh' => 31.2],
+            ['date' => 'Min, 19 Okt', 'kwh' => 14.7, 'remaining_kwh' => 30.0],
+        ]);
+
+        // Format data untuk grafik dan sisa kWh
+        $data = [
+            'labels' => $weeklyData->pluck('date'),
+            'datasets' => [
+                [
+                    'label' => 'Konsumsi (kWh)',
+                    'data' => $weeklyData->pluck('kwh'),
+                    'borderColor' => '#3b82f6',
+                    'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
+                    'fill' => true,
+                    'tension' => 0.4,
+                ],
+                [
+                    'label' => 'Sisa kWh',
+                    'data' => $weeklyData->pluck('remaining_kwh'),
+                    'borderColor' => '#facc15', // kuning
+                    'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
+                    'fill' => false,
+                    'tension' => 0.4,
+                ],
+            ],
+        ];
+// ssss
+$weeklySisakWh = collect([
+    ['date' => 'Sen, 13 Okt', 'kwh' => 12.5, 'remaining_kwh' => 39.0],
+    ['date' => 'Sel, 14 Okt', 'kwh' => 14.2, 'remaining_kwh' => 37.3],
+    ['date' => 'Rab, 15 Okt', 'kwh' => 11.8, 'remaining_kwh' => 36.0],
+    ['date' => 'Kam, 16 Okt', 'kwh' => 15.6, 'remaining_kwh' => 34.1],
+    ['date' => 'Jum, 17 Okt', 'kwh' => 13.9, 'remaining_kwh' => 32.8],
+    ['date' => 'Sab, 18 Okt', 'kwh' => 16.3, 'remaining_kwh' => 31.2],
+    ['date' => 'Min, 19 Okt', 'kwh' => 14.7, 'remaining_kwh' => 30.0],
+]);
+
+// Format data untuk grafik dan sisa kWh
+$data = [
+    'labels' => $weeklyData->pluck('date'),
+    'datasets' => [
+        [
+            'label' => 'Konsumsi (kWh)',
+            'data' => $weeklyData->pluck('kwh'),
+            'borderColor' => '#3b82f6',
+            'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
+            'fill' => true,
+            'tension' => 0.4,
+        ],
+        [
+            'label' => 'Sisa kWh',
+            'data' => $weeklyData->pluck('remaining_kwh'),
+            'borderColor' => '#facc15', // kuning
+            'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
+            'fill' => false,
+            'tension' => 0.4,
+        ],
+    ],
+];
+
+
         return view('dashboard.total_daya', compact(
             'hourlyData',
             'totalKwh',
             'totalCost',
             'hourlyChartLabels',
             'hourlyChartData',
+            'weeklyData',
+            'weeklyTotalKwh',
+            'weeklyTotalCost',
+            'weeklyAvgKwh',
+            'weeklyAvgWatt',
+            'weeklyChartLabels',
+            'weeklyChartKwh',
+            'weeklyChartCost'
+        ));
+
+        return view('dashboard.sisa_kWh', compact(
+
+            'totalKwh',
+            'totalCost',
+
             'weeklyData',
             'weeklyTotalKwh',
             'weeklyTotalCost',
