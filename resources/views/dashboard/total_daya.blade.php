@@ -99,13 +99,13 @@
 
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
-    <x-tab-navigation-home />
+        <x-tab-navigation-home />
+
         <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
-    
             <!-- Left: Data Harian (24 Jam) -->
             <div class="flex-1">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Data Harian Penggunaan Daya</h2>
-    
+
                 <!-- Line Chart Harian -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan Dayaaa (24 Jam)</h3>
@@ -113,7 +113,7 @@
                         <canvas id="hourly-chart"></canvas>
                     </div>
                 </div>
-    
+
                 <!-- Tabel Harian -->
                 <div class="bg-white rounded-3xl shadow-lg p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Penggunaan Per Jam</h3>
@@ -128,30 +128,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($hourlyData as $data)
-                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data['watt'] }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['kwh'], 2) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['cost'], 0, ',', '.') }}</td>
-                                </tr>
+                                @foreach ($hourlyData as $data)
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                        <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data['watt'] }}
+                                        </td>
+                                        <td class="py-3 px-4 text-right text-gray-900">
+                                            {{ number_format($data['kwh'], 2) }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900">
+                                            {{ number_format($data['cost'], 0, ',', '.') }}</td>
+                                    </tr>
                                 @endforeach
                                 <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                                     <td class="py-4 px-4 text-gray-900">Total</td>
                                     <td class="py-4 px-4 text-right text-gray-900">-</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($totalKwh, 2) }}</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($totalCost, 0, ',', '.') }}</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($totalKwh, 2) }}
+                                    </td>
+                                    <td class="py-4 px-4 text-right text-gray-900">
+                                        {{ number_format($totalCost, 0, ',', '.') }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-    
+
             <!-- Right: Data 7 Hari Terakhir -->
             <div class="flex-1">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Data 7 Hari Terakhir</h2>
-    
+
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-white rounded-2xl shadow-md p-4">
@@ -166,7 +171,8 @@
                     </div>
                     <div class="bg-white rounded-2xl shadow-md p-4">
                         <p class="text-xs text-gray-600 mb-1">Total Biaya</p>
-                        <p class="text-2xl font-bold text-gray-900">Rp{{ number_format($weeklyTotalCost, 0, ',', '.') }}</p>
+                        <p class="text-2xl font-bold text-gray-900">Rp{{ number_format($weeklyTotalCost, 0, ',', '.') }}
+                        </p>
                         <p class="text-xs text-gray-500 mt-1">7 hari</p>
                     </div>
                     <div class="bg-white rounded-2xl shadow-md p-4">
@@ -175,7 +181,7 @@
                         <p class="text-xs text-gray-500 mt-1">per hari</p>
                     </div>
                 </div>
-    
+
                 <!-- Line Chart 7 Hari -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan 7 Hari Terakhir</h3>
@@ -183,7 +189,7 @@
                         <canvas id="weekly-chart"></canvas>
                     </div>
                 </div>
-    
+
                 <!-- Tabel 7 Hari -->
                 <div class="bg-white rounded-3xl shadow-lg p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Penggunaan Per Hari</h3>
@@ -198,29 +204,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($weeklyData as $data)
-                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td class="py-3 px-4 text-gray-900">{{ $data['date'] }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data['avg_watt'], 0) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($data['kwh'], 2) }}</td>
-                                    <td class="py-3 px-4 text-right text-gray-900">{{ number_format($data['cost'], 0, ',', '.') }}</td>
-                                </tr>
+                                @foreach ($weeklyData as $data)
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                        <td class="py-3 px-4 text-gray-900">{{ $data['date'] }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
+                                            {{ number_format($data['avg_watt'], 0) }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
+                                            {{ number_format($data['kwh'], 2) }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900">
+                                            {{ number_format($data['cost'], 0, ',', '.') }}</td>
+                                    </tr>
                                 @endforeach
                                 <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                                     <td class="py-4 px-4 text-gray-900">Total</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($weeklyAvgWatt, 0) }} (avg)</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($weeklyTotalKwh, 2) }}</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">{{ number_format($weeklyTotalCost, 0, ',', '.') }}</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">
+                                        {{ number_format($weeklyAvgWatt, 0) }} (avg)</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">
+                                        {{ number_format($weeklyTotalKwh, 2) }}</td>
+                                    <td class="py-4 px-4 text-right text-gray-900">
+                                        {{ number_format($weeklyTotalCost, 0, ',', '.') }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-    
+
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Data dari Laravel Controller
@@ -229,7 +241,7 @@
         const weeklyChartLabels = @json($weeklyChartLabels);
         const weeklyChartKwh = @json($weeklyChartKwh);
         const weeklyChartCost = @json($weeklyChartCost);
-    
+
         // Chart 24 Jam
         const hourlyCtx = document.getElementById('hourly-chart').getContext('2d');
         new Chart(hourlyCtx, {
@@ -272,7 +284,7 @@
                 }
             }
         });
-    
+
         // Chart 7 Hari
         const weeklyCtx = document.getElementById('weekly-chart').getContext('2d');
         new Chart(weeklyCtx, {
@@ -346,4 +358,5 @@
     </script>
 
 </body>
+
 </html>

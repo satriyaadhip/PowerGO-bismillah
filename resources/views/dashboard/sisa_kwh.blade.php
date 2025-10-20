@@ -100,6 +100,28 @@
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
     <x-tab-navigation-home />
+    <div class="container mx-auto rounded-3xl my-2">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Detail listrik pelanggan</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <p class="text-sm text-gray-600 mb-1">Sisa kWh</p>
+                <p class="text-2xl font-bold text-gray-900">9.82 <span class="text-base font-normal">kWh</span></p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <p class="text-sm text-gray-600 mb-1">Isi Terakhir</p>
+                <p class="text-xl font-bold text-gray-900">22 Januari 2025</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <p class="text-sm text-gray-600 mb-1">Ampere (A)</p>
+                <p class="text-2xl font-bold text-gray-900"><span>3.22</span> A</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm p-4">
+                <p class="text-xs text-gray-600 mb-1">Rata-rata kWh/hari</p>
+                <p class="text-2xl font-bold text-gray-900"><span>14.14</span> kWh</p>
+            </div>
+            
+        </div>
+    </div>
         <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
     
             <!-- Left: Data Harian (24 Jam) -->

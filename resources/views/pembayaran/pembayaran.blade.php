@@ -92,40 +92,26 @@
                 <!-- Selected Amount & Payment Methods -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 bg-white rounded-3xl overflow-hidden">
                     <!-- Daya Terpilih -->
-                    <div id="selectedCard" class="bg-gradient-to-br from-pink-500 to-pink-600 p-6 text-white rounded-tl-2xl rounded-tr-2xl lg:rounded-tr-none">
+                    <div id="selectedCard" class="bg-gradient-to-br from-cyan-400 to-cyan-500 p-6 text-white rounded-tl-2xl rounded-tr-2xl lg:rounded-tr-none">
                         <p class="text-xl font-bold mb-4">Daya terpilih</p>
-                        <h2 id="selectedAmount" class="text-4xl font-bold mb-2">Rp1.000.000</h2>
-                        <p id="selectedKwh" class="text-lg">680.90 kWh</p>
+                        <h2 id="selectedAmount" class="text-4xl font-bold">Rp100.000</h2>
+                        <p id="selectedKwh" class="text-lg">68.18 kWh</p>
+                        <p class="text-lg mt-4">Metode Pembayaran:</p>
+                        <h3 id="selectedPaymentMethod" class="text-2xl font-semibold"></h3>
                     </div>
                     
                     <!-- Payment Methods -->
-                    <div class="bg-white rounded-2xl p-4">
+                    <div class="rounded-2xl p-4">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Pembayaran menggunakan</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            <button class="bg-[#9db33f] hover:bg-[#8da035] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                QRIS
-                            </button>
-                            <button class="bg-[#0da5a5] hover:bg-[#0c9393] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                m-Bank
-                            </button>
-                            <button class="bg-[#1a8bc9] hover:bg-[#1679b3] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                GoPay
-                            </button>
-                            <button class="bg-[#ff6b1a] hover:bg-[#e65f17] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                ShopeePay
-                            </button>
-                            <button class="bg-[#6b4ab5] hover:bg-[#5e40a0] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                Kredit/debit
-                            </button>
-                            <button class="bg-[#3fb562] hover:bg-[#36a055] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                Virtual Account
-                            </button>
-                            <button class="bg-[#c94444] hover:bg-[#b33d3d] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                Alfamart
-                            </button>
-                            <button class="bg-[#4a9fd8] hover:bg-[#428ec4] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md">
-                                Indomaret
-                            </button>
+                            <button class="payment-method-btn bg-[#9db33f] hover:bg-[#8da035] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'QRIS')">QRIS</button>
+                            <button class="payment-method-btn bg-[#0da5a5] hover:bg-[#0c9393] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'm-Bank')">m-Bank</button>
+                            <button class="payment-method-btn bg-[#1a8bc9] hover:bg-[#1679b3] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'GoPay')">GoPay</button>
+                            <button class="payment-method-btn bg-[#ff6b1a] hover:bg-[#e65f17] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'ShopeePay')">ShopeePay</button>
+                            <button class="payment-method-btn bg-[#6b4ab5] hover:bg-[#5e40a0] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Kredit/debit')">Kredit/debit</button>
+                            <button class="payment-method-btn bg-[#3fb562] hover:bg-[#36a055] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Virtual Account')">Virtual Account</button>
+                            <button class="payment-method-btn bg-[#c94444] hover:bg-[#b33d3d] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Alfamart')">Alfamart</button>
+                            <button class="payment-method-btn bg-[#4a9fd8] hover:bg-[#428ec4] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Indomaret')">Indomaret</button>
                         </div>
                     </div>
                 </div>
@@ -134,7 +120,7 @@
 
         <!-- Lanjut Pembayaran Button -->
         <div class="flex justify-center">
-            <button class="bg-white hover:bg-gray-50 transition-colors rounded-full p-4 flex items-center gap-3 font-bold text-gray-900 mt-4 shadow-md hover:shadow-xl">
+            <button class="bg-white hover:bg-gray-50 transition-colors rounded-full p-4 flex items-center gap-3 font-bold text-gray-900 mt-4 shadow-md hover:shadow-xl" onclick="handleProceedPayment()">
                 Lanjut pembayaran
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-6 h-6">
                     <circle cx="12" cy="12" r="12" fill="#000000" />
@@ -152,7 +138,6 @@ const colorMap = {
     'purple': 'from-purple-500 to-purple-600',
     'pink': 'from-pink-500 to-pink-600'
 };
-
 const ringMap = {
     'teal-5': 'ring-teal-300',
     'teal-4': 'ring-teal-300',
@@ -161,23 +146,37 @@ const ringMap = {
     'purple': 'ring-purple-300',
     'pink': 'ring-pink-300'
 };
-
 function selectToken(btn, amt, kwh, color) {
-    // Remove rings
     document.querySelectorAll('.token-btn').forEach(b => {
         b.classList.remove('ring-4', 'ring-teal-300', 'ring-cyan-300', 'ring-purple-300', 'ring-pink-300');
     });
-    
-    // Add ring
     btn.classList.add('ring-4', ringMap[color]);
-    
-    // Update card
     const card = document.getElementById('selectedCard');
     card.className = 'rounded-tl-2xl rounded-tr-2xl lg:rounded-tr-none p-6 text-white shadow-lg transition-all duration-300 bg-gradient-to-br ' + colorMap[color];
-    
-    // Update text
     document.getElementById('selectedAmount').textContent = amt;
     document.getElementById('selectedKwh').textContent = kwh + ' kWh';
+}
+function selectPaymentMethod(btn, method) {
+    document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('ring-4', 'ring-lime-300', 'ring-teal-300', 'ring-cyan-300', 'ring-purple-300', 'ring-pink-300', 'ring-blue-300', 'ring-orange-300', 'ring-red-300'));
+    btn.classList.add('ring-4', 'ring-lime-300');
+    document.getElementById('selectedPaymentMethod').textContent = method;
+}
+function handleProceedPayment() {
+    const method = document.getElementById('selectedPaymentMethod').textContent;
+    if (!method) {
+        const grid = document.querySelector('.grid.grid-cols-1.lg\\:grid-cols-2.bg-white.rounded-3xl.overflow-hidden');
+        if (grid) {
+            const originalBg = grid.style.background;
+            grid.style.transition = 'background 0.2s';
+            grid.style.background = '#c0c0c0';
+            setTimeout(() => {
+                grid.style.background = originalBg;
+            }, 400);
+        }
+        return false;
+    }
+    // Proceed to next (placeholder) page
+    window.location.href = '/pembayaran/lanjut';
 }
 </script>
     <!-- Mobile Bottom Navigation -->

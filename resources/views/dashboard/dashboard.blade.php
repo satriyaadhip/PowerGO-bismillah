@@ -8,78 +8,6 @@
     <!-- Exo font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script type="module">
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import {
-            getDatabase,
-            ref,
-            get
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-        // Firebase configuration - REPLACE WITH YOUR ACTUAL CONFIG
-        const firebaseConfig = {
-            projectId: "powergo-bismillah",
-            databaseURL: ENV('FIREBASE_DATABASE_URL'),
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "your-app-id"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Function to fetch and update data
-        async function updateDashboardData() {
-            try {
-                const dbRef = ref(db, 'sensor/-OakoQevOeQxnT0_7ydo');
-                const snapshot = await get(dbRef);
-
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const wattage = parseFloat(data.wattage) || 0;
-                    const maxWatt = 1300;
-                    const dashArray = 295;
-
-                    // Loop semua elemen dengan class total-power
-                    document.querySelectorAll('.total-power').forEach(el => {
-                        el.textContent = wattage.toFixed(2);
-                    });
-
-                    // Loop semua lingkaran
-                    document.querySelectorAll('.total-power-circle').forEach(circle => {
-                        // Hitung progress (0 = kosong, full circle = 1300W)
-                        let offset = dashArray - (wattage / maxWatt) * dashArray;
-                        if (offset < 0) offset = 0;
-                        if (offset > dashArray) offset = dashArray;
-                        circle.setAttribute('stroke-dashoffset', offset);
-
-                        // Warna otomatis
-                        if (wattage <= 900) {
-                            circle.setAttribute('stroke', '#22c55e'); // hijau
-                        } else if (wattage <= 1200) {
-                            circle.setAttribute('stroke', '#facc15'); // kuning
-                        } else {
-                            circle.setAttribute('stroke', '#ef4444'); // merah
-                        }
-                    });
-
-                    console.log("✅ Data fetched:", data);
-                } else {
-                    console.log("⚠️ No data available");
-                }
-            } catch (error) {
-                console.error("❌ Error fetching data: ", error);
-            }
-        }
-
-
-        // Call the function when DOM is loaded
-        document.addEventListener('DOMContentLoaded', updateDashboardData);
-    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -248,5 +176,37 @@
     <!-- Mobile Bottom Navigation -->
     <x-bottom-navigation />
 </body>
+<script>
+    async function fetchRealtimePower() {
+        const res = await fetch('/api/realtime');
+        const data = await res.json();
+    
+        const watt = Math.round(data?.watt || 0);
+        document.querySelector('.total-power').textContent = `${watt} W`;
+    
+        // Hitung progress
+        const maxPower = 1300;
+        const percentage = Math.min((watt / maxPower) * 100, 100);
+        const circle = document.querySelector('.total-power-circle');
+    
+        // Ubah panjang stroke
+        circle.style.strokeDashoffset = 264 - (264 * percentage) / 100;
+    
+        // Ubah warna sesuai batas
+        if (watt >= 1200) {
+            circle.style.stroke = '#ef4444'; // 🔴 merah
+        } else if (watt >= 900) {
+            circle.style.stroke = '#facc15'; // 🟡 kuning
+        } else {
+            circle.style.stroke = '#22c55e'; // 🟢 hijau
+        }
+    }
+    
+    // Jalankan realtime tiap 5 detik
+    setInterval(fetchRealtimePower, 5000);
+    fetchRealtimePower();
+    </script>
+    
+    
 
 </html>

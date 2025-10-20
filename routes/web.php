@@ -1,5 +1,6 @@
 <?php
   use App\Http\Controllers\GraphController;
+  use App\Http\Controllers\WattController;
   use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,3 +31,5 @@ Route::get('/about', function() {
 
 Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya']);
 Route::get('/dashboard/sisa_kwh', [GraphController::class, 'sisaKwh']);
+Route::get('/api/realtime', [WattController::class, 'getRealtimePower']);
+Route::post('/api/realtime', [WattController::class, 'setRealtimePower']);
