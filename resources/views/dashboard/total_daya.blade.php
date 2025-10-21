@@ -8,80 +8,6 @@
     <!-- Exo font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script type="module">
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import {
-            getDatabase,
-            ref,
-            get
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-        // Firebase configuration - REPLACE WITH YOUR ACTUAL CONFIG
-        const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "powergo-bismillah",
-            databaseURL: "https://powergo-bismillah-default-rtdb.firebaseio.com/",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "your-app-id"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Function to fetch and update data
-        async function updateDashboardData() {
-            try {
-                const dbRef = ref(db, 'sensor/-OakoQevOeQxnT0_7ydo');
-                const snapshot = await get(dbRef);
-
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const wattage = parseFloat(data.wattage) || 0;
-                    const maxWatt = 1300;
-                    const dashArray = 295;
-
-                    // Loop semua elemen dengan class total-power
-                    document.querySelectorAll('.total-power').forEach(el => {
-                        el.textContent = wattage.toFixed(2);
-                    });
-
-                    // Loop semua lingkaran
-                    document.querySelectorAll('.total-power-circle').forEach(circle => {
-                        // Hitung progress (0 = kosong, full circle = 1300W)
-                        let offset = dashArray - (wattage / maxWatt) * dashArray;
-                        if (offset < 0) offset = 0;
-                        if (offset > dashArray) offset = dashArray;
-                        circle.setAttribute('stroke-dashoffset', offset);
-
-                        // Warna otomatis
-                        if (wattage <= 900) {
-                            circle.setAttribute('stroke', '#22c55e'); // hijau
-                        } else if (wattage <= 1200) {
-                            circle.setAttribute('stroke', '#facc15'); // kuning
-                        } else {
-                            circle.setAttribute('stroke', '#ef4444'); // merah
-                        }
-                    });
-
-                    console.log("✅ Data fetched:", data);
-                } else {
-                    console.log("⚠️ No data available");
-                }
-            } catch (error) {
-                console.error("❌ Error fetching data: ", error);
-            }
-        }
-
-
-        // Call the function when DOM is loaded
-        document.addEventListener('DOMContentLoaded', updateDashboardData);
-    </script>
     <script>
         tailwind.config = {
             theme: {
@@ -100,19 +26,53 @@
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
         <x-tab-navigation-home />
-
-        <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
+        <div class="container mx-auto rounded-3xl my-2">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Detail listrik pelanggan</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-4 shadow-lg">
+                    <p class="text-sm text-gray-600 mb-1">Daya</p>
+                    <div class="flex items-baseline gap-1">
+                        <p class="text-base font-medium"><span class="text-2xl font-bold text-gray-900 total-power">0</span>W</p>
+                    </div>                   
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-lg">
+                    <p class="text-sm text-gray-600 mb-1">Tegangan/Arus</p>
+                    <div class="flex items-baseline gap-1">
+                        <p class="text-base font-semibold"><span class="text-2xl font-bold text-gray-900 total-volt">0</span>V</p>
+                        <span class="text-base font-normal">/</span>
+                        <p class="text-base font-semibold"><span class="text-2xl font-bold text-gray-900 total-amp">0</span>A</p>
+                    </div>                   
+                </div>                
+            </div>
+        </div>
+        <div class="container mx-auto flex flex-row gap-4 py-2">
             <!-- Left: Data Harian (24 Jam) -->
             <div class="flex-1">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Data Harian Penggunaan Daya</h2>
 
                 <!-- Line Chart Harian -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan Dayaaa (24 Jam)</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">Grafik Penggunaan Daya (24 Jam)</h3>
+                        <p class="text-sm text-gray-600 flex items-center">Terakhir update: <span class="">12 Oktober 2025</span><span class="">03.30</span></p>
+                    </div>
                     <div class="relative w-full h-[300px]">
                         <canvas id="hourly-chart"></canvas>
                     </div>
                 </div>
+
+                <!-- Line Chart 7 Hari -->
+                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan 7 Hari Terakhir</h3>
+                    <div class="relative w-full h-[350px]">
+                        <canvas id="weekly-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Data 7 Hari Terakhir -->
+            <div class="flex-1">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Data 7 Hari Terakhir</h2>
 
                 <!-- Tabel Harian -->
                 <div class="bg-white rounded-3xl shadow-lg p-6">
@@ -151,11 +111,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <!-- Right: Data 7 Hari Terakhir -->
-            <div class="flex-1">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Data 7 Hari Terakhir</h2>
 
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
@@ -182,13 +137,7 @@
                     </div>
                 </div>
 
-                <!-- Line Chart 7 Hari -->
-                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan 7 Hari Terakhir</h3>
-                    <div class="relative w-full h-[350px]">
-                        <canvas id="weekly-chart"></canvas>
-                    </div>
-                </div>
+                
 
                 <!-- Tabel 7 Hari -->
                 <div class="bg-white rounded-3xl shadow-lg p-6">
@@ -232,6 +181,29 @@
             </div>
         </div>
     </div>
+    <script>
+        async function fetchRealtimePower() {
+            const res = await fetch('/api/realtime');
+            const data = await res.json();
+
+            const voltage = Math.round(data?.voltage || 0);
+            document.querySelector('.total-volt').textContent = `${voltage}`;
+
+            const amperage = data?.amperage;
+            document.querySelector('.total-amp').textContent = `${amperage}`;
+    
+            const watt = Math.round(data?.watt || 0);
+            document.querySelector('.total-power').textContent = `${watt}`;
+  
+            // Hitung progress
+            const maxPower = 1300;
+            const percentage = Math.min((watt / maxPower) * 100, 100);
+        }
+    
+        // Jalankan realtime tiap 5 detik
+        setInterval(fetchRealtimePower, 5000);
+        fetchRealtimePower();
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

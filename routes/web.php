@@ -1,5 +1,7 @@
 <?php
-  use App\Http\Controllers\GraphController;
+
+use App\Http\Controllers\DayaController;
+use App\Http\Controllers\GraphController;
   use App\Http\Controllers\WattController;
   use Illuminate\Support\Facades\Route;
 
@@ -29,7 +31,7 @@ Route::get('/about', function() {
     return view('about');
 });
 
-Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya']);
-Route::get('/dashboard/sisa_kwh', [GraphController::class, 'sisaKwh']);
-Route::get('/api/realtime', [WattController::class, 'getRealtimePower']);
-Route::post('/api/realtime', [WattController::class, 'setRealtimePower']);
+Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya'])->name('dashboard.total_daya');
+Route::get('/dashboard/sisa_kwh', [GraphController::class, 'sisaKwh'])->name('dashboard.sisa_kwh');
+Route::get('/api/realtime', [DayaController::class, 'getRealtimePower']);
+Route::post('/api/realtime', [DayaController::class, 'setRealtimePower']);

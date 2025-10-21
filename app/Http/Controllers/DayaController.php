@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 
-class WattController extends Controller
+class DayaController extends Controller
 {
     protected $firebase;
 
@@ -31,7 +31,7 @@ class WattController extends Controller
         $payload = [
             'amperage' => $ampere,
             'voltage' => $voltage,
-            'watt' => (int) round($watt),
+            'watt' => $watt,
             'timestamp' => now()->toDateTimeString(),
         ];
 

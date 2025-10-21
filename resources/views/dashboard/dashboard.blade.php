@@ -27,9 +27,9 @@
     <x-header />
     <div class="bg-[#E1DFEC] mx-auto px-2 sm:px-4">
 
-    <x-tab-navigation-home />
+        <x-tab-navigation-home />
         <div class="container mx-auto flex flex-col md:flex-row gap-4 py-2">
-            
+
             <!-- Left Column -->
             <div class="bg-[#d5dbea] shadow-sm rounded-3xl p-4 sm:p-4 flex-1">
                 <h2 class="text-lg font-semibold text-gray-800 mb-2">Penggunaan energi</h2>
@@ -40,48 +40,67 @@
                             <!-- Total daya -->
                             <div class="flex flex-col flex-1 bg-[#eaeff4] shadow-md rounded-3xl p-4">
                                 <div class="relative w-24 h-24 mb-3 flex flex-col items-center justify-center">
-                                    <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8" fill="none" />
-                                        <circle cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" class="total-power-circle transition-all duration-500 ease-in-out" />
+                                    <svg class="absolute inset-0 w-full h-full transform -rotate-90"
+                                        viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8"
+                                            fill="none" />
+                                        <circle cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8"
+                                            fill="none" stroke-linecap="round" stroke-dasharray="264"
+                                            stroke-dashoffset="264"
+                                            class="total-power-circle transition-all duration-500 ease-in-out" />
                                     </svg>
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
                                     </div>
                                 </div>
                                 <p class="text-3xl font-bold text-gray-900 mt-2 total-power">NULL</p>
                                 <p class="text-sm text-gray-500 mb-2">dari 1300 W</p>
                                 <div class="flex justify-center mt-auto">
-                                    <button class="w-full bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800">
+                                    <a href="{{ route('dashboard.total_daya') }}"
+                                        class="w-full bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800 transition-colors hover:bg-gray-100">
                                         Total daya
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-6 h-6">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            class="w-6 h-6">
                                             <circle cx="12" cy="12" r="9" fill="#000000" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5" />
                                         </svg>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
 
                             <!-- Sisa kWh -->
                             <div class="flex flex-col flex-1 bg-[#eaeff4] shadow-md rounded-3xl p-4">
                                 <div class="relative w-24 h-24 mb-3 flex flex-col items-center justify-center">
-                                    <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8" fill="none" />
-                                        <circle cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" class="remaining-kwh-circle transition-all duration-500 ease-in-out" />
+                                    <svg class="absolute inset-0 w-full h-full transform -rotate-90"
+                                        viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="8"
+                                            fill="none" />
+                                        <circle cx="50" cy="50" r="42" stroke="#22c55e" stroke-width="8"
+                                            fill="none" stroke-linecap="round" stroke-dasharray="264"
+                                            stroke-dashoffset="264"
+                                            class="remaining-kwh-circle transition-all duration-500 ease-in-out" />
                                     </svg>
-                                    <img src="{{ asset('images/icon_kWh.png') }}" alt="icon meter" class="w-6 h-6 sm:w-8 sm:h-8">
+                                    <img src="{{ asset('images/icon_kWh.png') }}" alt="icon meter"
+                                        class="w-6 h-6 sm:w-8 sm:h-8">
                                 </div>
                                 <p class="text-3xl font-bold text-gray-900 mt-2 remaining-kwh">16.82</p>
                                 <p class="text-sm text-gray-500 mb-2">kWh</p>
                                 <div class="flex justify-center mt-auto">
-                                    <button class="w-full bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800">
+                                    <a href="{{ route('dashboard.sisa_kwh') }}"
+                                        class="w-full bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800 transition-colors hover:bg-gray-100">
                                         Sisa kWh
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-6 h-6">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            class="w-6 h-6">
                                             <circle cx="12" cy="12" r="9" fill="#000000" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5" />
                                         </svg>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
 
@@ -129,9 +148,12 @@
                         <p class="text-lg text-gray-900">
                             Sisa kWh <span class="font-bold">16.82</span>, lakukan pembayaran listrik.
                         </p>
-                        <button class="bg-white hover:bg-gray-50 transition-colors rounded-2xl px-6 py-3 flex items-center gap-3 font-bold text-gray-900 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        <button
+                            class="bg-white hover:bg-gray-50 transition-colors rounded-2xl px-6 py-3 flex items-center gap-3 font-bold text-gray-900 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                             Pembayaran
                         </button>
@@ -180,33 +202,33 @@
     async function fetchRealtimePower() {
         const res = await fetch('/api/realtime');
         const data = await res.json();
-    
+
         const watt = Math.round(data?.watt || 0);
         document.querySelector('.total-power').textContent = `${watt} W`;
-    
+
         // Hitung progress
         const maxPower = 1300;
         const percentage = Math.min((watt / maxPower) * 100, 100);
         const circle = document.querySelector('.total-power-circle');
-    
+
         // Ubah panjang stroke
         circle.style.strokeDashoffset = 264 - (264 * percentage) / 100;
-    
+
         // Ubah warna sesuai batas
         if (watt >= 1200) {
-            circle.style.stroke = '#ef4444'; // 🔴 merah
+            circle.style.stroke = '#ef4444';
         } else if (watt >= 900) {
-            circle.style.stroke = '#facc15'; // 🟡 kuning
+            circle.style.stroke = '#facc15';
         } else {
-            circle.style.stroke = '#22c55e'; // 🟢 hijau
+            circle.style.stroke = '#22c55e';
         }
     }
-    
+
     // Jalankan realtime tiap 5 detik
     setInterval(fetchRealtimePower, 5000);
     fetchRealtimePower();
-    </script>
-    
-    
+</script>
+
+
 
 </html>
