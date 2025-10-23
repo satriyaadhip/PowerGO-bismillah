@@ -32,50 +32,55 @@
                 <div class="bg-white rounded-2xl p-4 shadow-lg">
                     <p class="text-sm text-gray-600 mb-1">Daya</p>
                     <div class="flex items-baseline gap-1">
-                        <p class="text-base font-medium"><span class="text-2xl font-bold text-gray-900 total-power">0</span>W</p>
-                    </div>                   
+                        <p class="text-base font-semibold"><span
+                                class="text-2xl font-bold text-gray-900 total-power">0</span>W</p>
+                        <span class="text-base font-normal">/</span>
+                        <p class="text-base font-semibold"><span class="text-2xl font-bold text-gray-900">1300</span>W
+                        </p>
+                    </div>
                 </div>
                 <div class="bg-white rounded-2xl p-4 shadow-lg">
                     <p class="text-sm text-gray-600 mb-1">Tegangan/Arus</p>
                     <div class="flex items-baseline gap-1">
-                        <p class="text-base font-semibold"><span class="text-2xl font-bold text-gray-900 total-volt">0</span>V</p>
+                        <p class="text-base font-semibold"><span
+                                class="text-2xl font-bold text-gray-900 total-volt">0</span>V</p>
                         <span class="text-base font-normal">/</span>
-                        <p class="text-base font-semibold"><span class="text-2xl font-bold text-gray-900 total-amp">0</span>A</p>
-                    </div>                   
-                </div>                
+                        <p class="text-base font-semibold"><span
+                                class="text-2xl font-bold text-gray-900 total-amp">0</span>A</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="container mx-auto flex flex-row gap-4 py-2">
+        <!-- Gabungkan grafik 24 jam dan 7 hari dalam 1 flex row (setara) -->
+        <div class="container mx-auto flex flex-col lg:flex-row gap-4 py-2">
             <!-- Left: Data Harian (24 Jam) -->
-            <div class="flex-1">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Data Harian Penggunaan Daya</h2>
-
-                <!-- Line Chart Harian -->
-                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
-                    <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col flex-1 gap-4">
+                <div class="bg-white rounded-3xl shadow-lg flex flex-col p-4">
+                    <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold text-gray-900 flex items-center">Grafik Penggunaan Daya (24 Jam)</h3>
-                        <p class="text-sm text-gray-600 flex items-center">Terakhir update: <span class="">12 Oktober 2025</span><span class="">03.30</span></p>
                     </div>
-                    <div class="relative w-full h-[300px]">
+                    <div class="w-full h-[200px] mb-6">
                         <canvas id="hourly-chart"></canvas>
+                        <p class="text-sm text-gray-600 flex items-center mt-1">
+                            Terakhir update: <span class="">12 Oktober 2025</span>
+                            <span class="ml-1">03.30</span>
+                        </p>
                     </div>
                 </div>
-
-                <!-- Line Chart 7 Hari -->
-                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Grafik Penggunaan 7 Hari Terakhir</h3>
-                    <div class="relative w-full h-[350px]">
-                        <canvas id="weekly-chart"></canvas>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white rounded-2xl shadow-md p-4">
+                        <p class="text-xs text-gray-600 mb-1">Total kWh</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ number_format($weeklyTotalKwh, 2) }}</p>
+                        <p class="text-xs text-gray-500 mt-1">7 hari</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md p-4">
+                        <p class="text-xs text-gray-600 mb-1">Total Biaya</p>
+                        <p class="text-2xl font-bold text-gray-900">
+                            {{ number_format($weeklyTotalCost, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">7 hari</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Right: Data 7 Hari Terakhir -->
-            <div class="flex-1">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Data 7 Hari Terakhir</h2>
-
-                <!-- Tabel Harian -->
-                <div class="bg-white rounded-3xl shadow-lg p-6">
+                <div class="bg-white rounded-3xl shadow-lg p-4 flex-1 flex flex-col">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Penggunaan Per Jam</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full">
@@ -91,8 +96,8 @@
                                 @foreach ($hourlyData as $data)
                                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ $data['watt'] }}
-                                        </td>
+                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
+                                            {{ $data['watt'] }}</td>
                                         <td class="py-3 px-4 text-right text-gray-900">
                                             {{ number_format($data['kwh'], 2) }}</td>
                                         <td class="py-3 px-4 text-right text-gray-900">
@@ -111,73 +116,15 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- Summary Cards -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-white rounded-2xl shadow-md p-4">
-                        <p class="text-xs text-gray-600 mb-1">Total kWh</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($weeklyTotalKwh, 2) }}</p>
-                        <p class="text-xs text-gray-500 mt-1">7 hari</p>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-md p-4">
-                        <p class="text-xs text-gray-600 mb-1">Rata-rata kWh/hari</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($weeklyAvgKwh, 2) }}</p>
-                        <p class="text-xs text-gray-500 mt-1">per hari</p>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-md p-4">
-                        <p class="text-xs text-gray-600 mb-1">Total Biaya</p>
-                        <p class="text-2xl font-bold text-gray-900">Rp{{ number_format($weeklyTotalCost, 0, ',', '.') }}
-                        </p>
-                        <p class="text-xs text-gray-500 mt-1">7 hari</p>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-md p-4">
-                        <p class="text-xs text-gray-600 mb-1">Rata-rata Daya</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($weeklyAvgWatt, 0) }} W</p>
-                        <p class="text-xs text-gray-500 mt-1">per hari</p>
+            </div>
+            <!-- Right: Grafik 7 Hari (sejajar dengan grafik 24 jam) -->
+            <div class="flex flex-col flex-1 gap-4">
+                <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col h-[350px]">
+                    <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan 7 Hari Terakhir</h3>
+                    <div class="w-full h-[200px] flex-1">
+                        <canvas id="weekly-chart"></canvas>
                     </div>
                 </div>
-
-                
-
-                <!-- Tabel 7 Hari -->
-                <div class="bg-white rounded-3xl shadow-lg p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Penggunaan Per Hari</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b-2 border-gray-200">
-                                    <th class="text-left py-3 px-4 font-bold text-gray-700">Tanggal</th>
-                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Rata-rata Daya (W)</th>
-                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Total kWh</th>
-                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Biaya (Rp)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($weeklyData as $data)
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                        <td class="py-3 px-4 text-gray-900">{{ $data['date'] }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
-                                            {{ number_format($data['avg_watt'], 0) }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
-                                            {{ number_format($data['kwh'], 2) }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900">
-                                            {{ number_format($data['cost'], 0, ',', '.') }}</td>
-                                    </tr>
-                                @endforeach
-                                <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
-                                    <td class="py-4 px-4 text-gray-900">Total</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">
-                                        {{ number_format($weeklyAvgWatt, 0) }} (avg)</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">
-                                        {{ number_format($weeklyTotalKwh, 2) }}</td>
-                                    <td class="py-4 px-4 text-right text-gray-900">
-                                        {{ number_format($weeklyTotalCost, 0, ',', '.') }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -191,15 +138,15 @@
 
             const amperage = data?.amperage;
             document.querySelector('.total-amp').textContent = `${amperage}`;
-    
+
             const watt = Math.round(data?.watt || 0);
             document.querySelector('.total-power').textContent = `${watt}`;
-  
+
             // Hitung progress
             const maxPower = 1300;
             const percentage = Math.min((watt / maxPower) * 100, 100);
         }
-    
+
         // Jalankan realtime tiap 5 detik
         setInterval(fetchRealtimePower, 5000);
         fetchRealtimePower();
