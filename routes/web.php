@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\DayaController;
 use App\Http\Controllers\GraphController;
-  use App\Http\Controllers\WattController;
-  use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WattController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FirebaseController;
 
 Route::get('/', function () {
     return view('home');
@@ -31,7 +32,15 @@ Route::get('/about', function() {
     return view('about');
 });
 
+Route::get('/', [DayaController::class, 'index']);
+Route::get('/firebase/sync', [FirebaseController::class, 'syncToMySQL']);
+Route::get('/api/realtime', [FirebaseController::class, 'getRealtime']);
 Route::get('/dashboard/total_daya', [GraphController::class, 'totalDaya'])->name('dashboard.total_daya');
 Route::get('/dashboard/sisa_kwh', [GraphController::class, 'sisaKwh'])->name('dashboard.sisa_kwh');
 Route::get('/api/realtime', [DayaController::class, 'getRealtimePower']);
 Route::post('/api/realtime', [DayaController::class, 'setRealtimePower']);
+Route::get('/firebase/sync', [FirebaseController::class, 'syncToMySQL']);
+
+
+Route::get('/total-daya', [GraphController::class, 'totalDaya'])->name('total_daya');
+Route::get('/sisa-kwh', [GraphController::class, 'sisaKwh'])->name('sisa_kwh');

@@ -10,12 +10,20 @@ return new class extends Migration
     {
         Schema::create('records', function (Blueprint $table) {
             $table->id();
+        
+            // Tambahkan kolom foreign key
+            $table->foreignId('device_id')
+                  ->nullable() // supaya nggak error dulu saat awal
+                  ->constrained('devices')
+                  ->onDelete('cascade');
+        
             $table->float('voltage');   // V
-            $table->float('amperage');       // A
-            $table->float('watt');       // Watt
+            $table->float('amperage');  // A
+            $table->float('watt');      // Watt
             $table->timestamp('timestamp');  // waktu record dari Firebase
             $table->timestamps();
         });
+        
     }
 
     public function down(): void

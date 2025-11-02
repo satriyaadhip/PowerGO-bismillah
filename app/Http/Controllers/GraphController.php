@@ -2,336 +2,131 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use App\Models\Record;
+use Carbon\Carbon;
+
 class GraphController extends Controller
 {
     public function totalDaya()
     {
-        // Data Harian (24 Jam) - contoh data dummy
-        $hourlyData = collect([
-            ['time' => '00:00 - 01:00', 'watt' => 120, 'kwh' => 0.12, 'cost' => 1650],
-            ['time' => '01:00 - 02:00', 'watt' => 100, 'kwh' => 0.10, 'cost' => 1375],
-            ['time' => '02:00 - 03:00', 'watt' => 80, 'kwh' => 0.08, 'cost' => 1100],
-            ['time' => '03:00 - 04:00', 'watt' => 70, 'kwh' => 0.07, 'cost' => 963],
-            ['time' => '04:00 - 05:00', 'watt' => 60, 'kwh' => 0.06, 'cost' => 825],
-            ['time' => '05:00 - 06:00', 'watt' => 90, 'kwh' => 0.09, 'cost' => 1238],
-            ['time' => '06:00 - 07:00', 'watt' => 150, 'kwh' => 0.15, 'cost' => 2063],
-            ['time' => '07:00 - 08:00', 'watt' => 220, 'kwh' => 0.22, 'cost' => 3025],
-            ['time' => '08:00 - 09:00', 'watt' => 280, 'kwh' => 0.28, 'cost' => 3850],
-            ['time' => '09:00 - 10:00', 'watt' => 300, 'kwh' => 0.30, 'cost' => 4125],
-            ['time' => '10:00 - 11:00', 'watt' => 320, 'kwh' => 0.32, 'cost' => 4400],
-            ['time' => '11:00 - 12:00', 'watt' => 400, 'kwh' => 0.40, 'cost' => 5500],
-            ['time' => '12:00 - 13:00', 'watt' => 450, 'kwh' => 0.45, 'cost' => 6188],
-            ['time' => '13:00 - 14:00', 'watt' => 420, 'kwh' => 0.42, 'cost' => 5775],
-            ['time' => '14:00 - 15:00', 'watt' => 380, 'kwh' => 0.38, 'cost' => 5225],
-            ['time' => '15:00 - 16:00', 'watt' => 360, 'kwh' => 0.36, 'cost' => 4950],
-            ['time' => '16:00 - 17:00', 'watt' => 340, 'kwh' => 0.34, 'cost' => 4675],
-            ['time' => '17:00 - 18:00', 'watt' => 420, 'kwh' => 0.42, 'cost' => 5775],
-            ['time' => '18:00 - 19:00', 'watt' => 520, 'kwh' => 0.52, 'cost' => 7150],
-            ['time' => '19:00 - 20:00', 'watt' => 500, 'kwh' => 0.50, 'cost' => 6875],
-            ['time' => '20:00 - 21:00', 'watt' => 480, 'kwh' => 0.48, 'cost' => 6600],
-            ['time' => '21:00 - 22:00', 'watt' => 350, 'kwh' => 0.35, 'cost' => 4813],
-            ['time' => '22:00 - 23:00', 'watt' => 280, 'kwh' => 0.28, 'cost' => 3850],
-            ['time' => '23:00 - 00:00', 'watt' => 200, 'kwh' => 0.20, 'cost' => 2750],
-        ]);
+        // Ambil data record 24 jam terakhir dari MySQL
+        $records = Record::where('timestamp', '>=', now()->subDay())
+            ->orderBy('timestamp', 'asc')
+            ->get();
 
+        if ($records->isEmpty()) {
+            return view('dashboard.total_daya')->with([
+                'hourlyData' => [],
+                'hourlyChartLabels' => [],
+                'hourlyChartData' => [],
+                'totalKwh' => 0,
+                'totalCost' => 0,
+                'weeklyData' => [],
+                'weeklyChartLabels' => [],
+                'weeklyChartKwh' => [],
+                'weeklyChartCost' => [],
+                'weeklyTotalKwh' => 0,
+                'weeklyTotalCost' => 0,
+                'weeklyAvgKwh' => 0,
+                'weeklyAvgWatt' => 0
+            ]);
+        }
+
+        // Format data per jam
+        $hourlyFormatted = $records->groupBy(function ($record) {
+            return Carbon::parse($record->timestamp)->format('H:00 - H:59');
+        })->map(function ($group) {
+            $avgWatt = $group->avg('watt');
+            $kwh = round(($avgWatt / 1000), 2); // 1 jam = watt/1000 kWh
+            $cost = $kwh * 13750; // tarif listrik Rp 1375 per kWh (contoh)
+            return [
+                'time' => Carbon::parse(optional($group->first())->timestamp ?? now())->format('H:00 - H:59'),
+                'watt' => round($avgWatt, 2),
+                'kwh' => $kwh,
+                'cost' => round($cost, 0),
+            ];
+        })->values();
+
+        // Alias biar Blade tetap bisa akses $hourlyData
+        $hourlyData = $hourlyFormatted;
+
+        // Chart data untuk grafik 24 jam
+        $hourlyChartLabels = $hourlyData->pluck('time')->toArray();
+        $hourlyChartData = $hourlyData->pluck('watt')->toArray();
+
+        // Total kWh dan total biaya (harian)
         $totalKwh = $hourlyData->sum('kwh');
         $totalCost = $hourlyData->sum('cost');
 
-        $hourlyChartLabels = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-        $hourlyChartData = [120, 80, 60, 150, 280, 320, 450, 380, 340, 520, 480, 280];
+        // --- DATA 7 HARI TERAKHIR ---
+        $weeklyData = Record::selectRaw('DATE(timestamp) as date, AVG(watt) as avg_watt, SUM(watt)/1000 as kwh')
+            ->where('timestamp', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($row) {
+                $row->cost = round($row->kwh * 13750, 0);
+                return $row;
+            });
 
-        // Data 7 Hari - contoh data dummy
-        $weeklyData = collect([
-            ['date' => 'Senin, 13 Oktober 2025', 'avg_watt' => 520, 'kwh' => 12.5, 'cost' => 171875],
-            ['date' => 'Selasa, 14 Oktober 2025', 'avg_watt' => 592, 'kwh' => 14.2, 'cost' => 195250],
-            ['date' => 'Rabu, 15 Oktober 2025', 'avg_watt' => 492, 'kwh' => 11.8, 'cost' => 162250],
-            ['date' => 'Kamis, 16 Oktober 2025', 'avg_watt' => 650, 'kwh' => 15.6, 'cost' => 214500],
-            ['date' => 'Jumat, 17 Oktober 2025', 'avg_watt' => 579, 'kwh' => 13.9, 'cost' => 191125],
-            ['date' => 'Sabtu, 18 Oktober 2025', 'avg_watt' => 679, 'kwh' => 16.3, 'cost' => 224125],
-            ['date' => 'Minggu, 19 Oktober 2025', 'avg_watt' => 613, 'kwh' => 14.7, 'cost' => 202125],
-        ]);
+        $weeklyChartLabels = $weeklyData->pluck('date')->map(function ($d) {
+            return Carbon::parse($d)->format('d M');
+        })->toArray();
+        $weeklyChartKwh = $weeklyData->pluck('kwh')->toArray();
+        $weeklyChartCost = $weeklyData->pluck('cost')->toArray();
 
         $weeklyTotalKwh = $weeklyData->sum('kwh');
         $weeklyTotalCost = $weeklyData->sum('cost');
-        $weeklyAvgKwh = $weeklyTotalKwh / $weeklyData->count();
+        $weeklyAvgKwh = $weeklyData->avg('kwh');
         $weeklyAvgWatt = $weeklyData->avg('avg_watt');
 
-        $weeklyChartLabels = ['Sen, 13 Okt', 'Sel, 14 Okt', 'Rab, 15 Okt', 'Kam, 16 Okt', 'Jum, 17 Okt', 'Sab, 18 Okt', 'Min, 19 Okt'];
-        $weeklyChartKwh = [12.5, 14.2, 11.8, 15.6, 13.9, 16.3, 14.7];
-        $weeklyChartCost = [171875, 195250, 162250, 214500, 191125, 224125, 202125];
-
-        // Format data untuk grafik dan sisa kWh
-        $data = [
-            'labels' => $weeklyData->pluck('date'),
-            'datasets' => [
-                [
-                    'label' => 'Konsumsi (kWh)',
-                    'data' => $weeklyData->pluck('kwh'),
-                    'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
-                    'fill' => true,
-                    'tension' => 0.4,
-                ],
-                [
-                    'label' => 'Sisa kWh',
-                    'data' => $weeklyData->pluck('remaining_kwh'),
-                    'borderColor' => '#facc15', // kuning
-                    'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
-                    'fill' => false,
-                    'tension' => 0.4,
-                ],
-            ],
-        ];
-// ssss
-$weeklySisakWh = collect([
-    ['date' => 'Sen, 13 Okt', 'kwh' => 12.5, 'remaining_kwh' => 39.0],
-    ['date' => 'Sel, 14 Okt', 'kwh' => 14.2, 'remaining_kwh' => 37.3],
-    ['date' => 'Rab, 15 Okt', 'kwh' => 11.8, 'remaining_kwh' => 36.0],
-    ['date' => 'Kam, 16 Okt', 'kwh' => 15.6, 'remaining_kwh' => 34.1],
-    ['date' => 'Jum, 17 Okt', 'kwh' => 13.9, 'remaining_kwh' => 32.8],
-    ['date' => 'Sab, 18 Okt', 'kwh' => 16.3, 'remaining_kwh' => 31.2],
-    ['date' => 'Min, 19 Okt', 'kwh' => 14.7, 'remaining_kwh' => 30.0],
-]);
-
-// Format data untuk grafik dan sisa kWh
-$data = [
-    'labels' => $weeklyData->pluck('date'),
-    'datasets' => [
-        [
-            'label' => 'Konsumsi (kWh)',
-            'data' => $weeklyData->pluck('kwh'),
-            'borderColor' => '#3b82f6',
-            'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
-            'fill' => true,
-            'tension' => 0.4,
-        ],
-        [
-            'label' => 'Sisa kWh',
-            'data' => $weeklyData->pluck('remaining_kwh'),
-            'borderColor' => '#facc15', // kuning
-            'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
-            'fill' => false,
-            'tension' => 0.4,
-        ],
-    ],
-];
-
-
+        // Kirim semua data ke Blade
         return view('dashboard.total_daya', compact(
             'hourlyData',
-            'totalKwh',
-            'totalCost',
             'hourlyChartLabels',
             'hourlyChartData',
-            'weeklyData',
-            'weeklyTotalKwh',
-            'weeklyTotalCost',
-            'weeklyAvgKwh',
-            'weeklyAvgWatt',
-            'weeklyChartLabels',
-            'weeklyChartKwh',
-            'weeklyChartCost'
-        ));
-
-        return view('dashboard.sisa_kWh', compact(
-
             'totalKwh',
             'totalCost',
-
             'weeklyData',
+            'weeklyChartLabels',
+            'weeklyChartKwh',
+            'weeklyChartCost',
             'weeklyTotalKwh',
             'weeklyTotalCost',
             'weeklyAvgKwh',
-            'weeklyAvgWatt',
-            'weeklyChartLabels',
-            'weeklyChartKwh',
-            'weeklyChartCost'
+            'weeklyAvgWatt'
         ));
     }
 
     public function sisaKwh()
     {
-        $hourlyKwh = collect([
-            [
-                'time' => '00:00 - 01:00',
-                'remaining_kwh' => 39.0,
-                'kwh' => 1.2,
-                'cost' => 1.2 * 13750,
-            ],
-            [
-                'time' => '01:00 - 02:00',
-                'remaining_kwh' => 37.8,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '02:00 - 03:00',
-                'remaining_kwh' => 37.1,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '03:00 - 04:00',
-                'remaining_kwh' => 36.3,
-                'kwh' => 0.4,
-                'cost' => 0.4 * 13750,
-            ],
-            [
-                'time' => '04:00 - 05:00',
-                'remaining_kwh' => 35.9,
-                'kwh' => 0.6,
-                'cost' => 0.6 * 13750,
-            ],
-            [
-                'time' => '05:00 - 06:00',
-                'remaining_kwh' => 35.3,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '06:00 - 07:00',
-                'remaining_kwh' => 34.6,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '07:00 - 08:00',
-                'remaining_kwh' => 33.8,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '08:00 - 09:00',
-                'remaining_kwh' => 33.1,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '09:00 - 10:00',
-                'remaining_kwh' => 32.3,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '10:00 - 11:00',
-                'remaining_kwh' => 31.6,
-                'kwh' => 0.6,
-                'cost' => 0.6 * 13750,
-            ],
-            [
-                'time' => '11:00 - 12:00',
-                'remaining_kwh' => 31.0,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '12:00 - 13:00',
-                'remaining_kwh' => 30.2,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '13:00 - 14:00',
-                'remaining_kwh' => 29.5,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '14:00 - 15:00',
-                'remaining_kwh' => 28.7,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '15:00 - 16:00',
-                'remaining_kwh' => 28.0,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '16:00 - 17:00',
-                'remaining_kwh' => 27.3,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '17:00 - 18:00',
-                'remaining_kwh' => 26.5,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '18:00 - 19:00',
-                'remaining_kwh' => 25.8,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '19:00 - 20:00',
-                'remaining_kwh' => 25.0,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '20:00 - 21:00',
-                'remaining_kwh' => 24.3,
-                'kwh' => 0.8,
-                'cost' => 0.8 * 13750,
-            ],
-            [
-                'time' => '21:00 - 22:00',
-                'remaining_kwh' => 23.5,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '22:00 - 23:00',
-                'remaining_kwh' => 22.8,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-            [
-                'time' => '23:00 - 00:00',
-                'remaining_kwh' => 22.1,
-                'kwh' => 0.7,
-                'cost' => 0.7 * 13750,
-            ],
-        ])->map(function ($item) {
-            $item['cost'] = round($item['kwh'] * 13750);
-            return $item;
-        });
+        // Ambil data dari MySQL untuk 24 jam terakhir
+        $records = Record::where('timestamp', '>=', now()->subDay())
+            ->orderBy('timestamp', 'asc')
+            ->get();
 
-        $totalKwh = $hourlyKwh->sum('kwh');
-        $totalCost = $hourlyKwh->sum('cost');
+        $hourlyData = $records->groupBy(function ($record) {
+            return Carbon::parse($record->timestamp)->format('H:00 - H:59');
+        })->map(function ($group, $hour) {
+            $kwh = round($group->avg('watt') / 1000, 2);
+            $remaining = max(40 - $kwh, 0); // contoh: asumsi saldo awal 40 kWh
+            $cost = round($kwh * 13750, 0);
+            return [
+                'time' => $hour,
+                'remaining_kwh' => $remaining,
+                'kwh' => $kwh,
+                'cost' => $cost,
+            ];
+        })->values();
 
-        $hourlyChartLabels = $hourlyKwh->pluck('time')->toArray();
-        $hourlyChartData = $hourlyKwh->pluck('remaining_kwh')->toArray();
-
-        // Format data untuk grafik dan sisa kWh
-        $data = [
-            'labels' => $hourlyKwh->pluck('date'),
-            'datasets' => [
-                [
-                    'label' => 'Konsumsi (kWh)',
-                    'data' => $hourlyKwh->pluck('kwh'),
-                    'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
-                    'fill' => true,
-                    'tension' => 0.4,
-                ],
-                [
-                    'label' => 'Sisa kWh',
-                    'data' => $hourlyKwh->pluck('remaining_kwh'),
-                    'borderColor' => '#facc15', // kuning
-                    'backgroundColor' => 'rgba(250, 204, 21, 0.2)',
-                    'fill' => false,
-                    'tension' => 0.4,
-                ],
-            ],
-        ];
+        $hourlyChartLabels = $hourlyData->pluck('time')->toArray();
+        $hourlyChartData = $hourlyData->pluck('remaining_kwh')->toArray();
+        $totalKwh = $hourlyData->sum('kwh');
+        $totalCost = $hourlyData->sum('cost');
 
         return view('dashboard.sisa_kwh', compact(
-            'hourlyKwh',
+            'hourlyData',
             'totalKwh',
             'totalCost',
             'hourlyChartLabels',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+Use App\Models\Device;
 
 class Record extends Model
 {
@@ -19,4 +20,10 @@ class Record extends Model
     protected $dates = [
         'timestamp',
     ];
+
+    public function device()
+    {
+        return $this->belongsTo(Device::class);
+    }
+
 }

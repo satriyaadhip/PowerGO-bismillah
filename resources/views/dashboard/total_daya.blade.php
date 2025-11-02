@@ -118,11 +118,42 @@
                 </div>
             </div>
             <!-- Right: Grafik 7 Hari (sejajar dengan grafik 24 jam) -->
+            <!-- Right: Grafik 7 Hari (sejajar dengan grafik 24 jam) -->
             <div class="flex flex-col flex-1 gap-4">
-                <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col h-[350px]">
-                    <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan 7 Hari Terakhir</h3>
-                    <div class="w-full h-[200px] flex-1">
+                <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col h-[405px]">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Grafik Penggunaan 7 Hari Terakhir</h3>
+                    <div class="w-full h-[240px] flex-1">
                         <canvas id="weekly-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col flex-1">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Rincian 7 Hari Terakhir</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-4 font-bold text-gray-700">Tanggal</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Rata-rata (W)</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Total kWh</th>
+                                    <th class="text-right py-3 px-4 font-bold text-gray-700">Biaya (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($weeklyData as $day)
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                        <td class="py-3 px-4 text-gray-900">{{ $day['date'] }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">{{ number_format($day['avg_watt'], 2) }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900">{{ number_format($day['kwh'], 2) }}</td>
+                                        <td class="py-3 px-4 text-right text-gray-900">{{ number_format($day['cost'], 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="py-4 text-center text-gray-500">Belum ada data mingguan</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
