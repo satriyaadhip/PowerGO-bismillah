@@ -40,4 +40,9 @@ class DayaController extends Controller
 
         return response()->json(['success' => true, 'data' => $payload]);
     }
+    // Added by assistant: simple index method to satisfy routes calling DayaController@index
+public function index()
+{
+}
+
 }

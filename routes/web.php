@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\DayaController;
-use App\Http\Controllers\GraphController;
-use App\Http\Controllers\WattController;
+    use App\Http\Controllers\GraphController;
+    use App\Http\Controllers\RecordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FirebaseController;
 

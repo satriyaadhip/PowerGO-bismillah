@@ -125,12 +125,17 @@ class GraphController extends Controller
         $totalKwh = $hourlyData->sum('kwh');
         $totalCost = $hourlyData->sum('cost');
 
+        // Tambahkan ini
+        $hourlyKwh = $hourlyData->pluck('kwh')->toArray();
+
         return view('dashboard.sisa_kwh', compact(
             'hourlyData',
+            'hourlyKwh',         // ← tambahan penting
             'totalKwh',
             'totalCost',
             'hourlyChartLabels',
             'hourlyChartData'
         ));
     }
+
 }
