@@ -3,7 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\FirebaseController;
+use App\Http\Controllers\DayaController;
 
+Route::get('/realtime', [FirebaseController::class, 'getRealtime']);
+Route::post('/realtime', [DayaController::class, 'setRealtimePower']);
 /*
 |--------------------------------------------------------------------------
 | API Routes

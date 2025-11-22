@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Device;
-use App\Models\Record;
 use App\Services\FirebaseService;
-use Illuminate\Support\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Models\Record;
 
 class FirebaseController extends Controller
 {
@@ -16,38 +16,66 @@ class FirebaseController extends Controller
         $this->firebase = $firebase;
     }
 
-    public function syncToMySQL()
+    /**
+     * Mendapatkan data realtime dari Firebase, jika gagal fallback ke database.
+     * Endpoint: /api/realtime (GET)
+     */
+    public function getRealtimeData()
     {
-        $data = $this->firebase->getData('powergo/realtime');
+        // Coba ambil data realtime dari Firebase
+        $raw = $this->firebase->getData('powergo/realtime');
 
-        if (!$data) {
-            return response()->json(['message' => 'Tidak ada data dari Firebase.'], 404);
+        // Siapkan fallback null agar konsisten
+        $fallback = [
+            'device_id' => 0,
+            'voltage' => 0.0,
+            'amperage' => 0.0,
+            'watt' => 0.0,
+            'timestamp' => now()->toDateTimeString(),
+            'source' => 'none'
+        ];
+
+        // Jika dapat data array dari Firebase dan minimal ada 1 key utama
+        if (!empty($raw) && is_array($raw)) {
+            $data = [
+                'device_id' => $raw['device_id'] ?? ($raw['deviceId'] ?? 0),
+                'voltage' => isset($raw['voltage']) ? (float)$raw['voltage'] : (float)($raw['voltage_v'] ?? 0),
+                'amperage' => isset($raw['amperage']) ? (float)$raw['amperage'] : (float)($raw['current'] ?? 0),
+                'watt' => isset($raw['watt']) ? (float)$raw['watt'] : (float)($raw['power'] ?? 0),
+                'timestamp' => $raw['timestamp'] ?? now()->toDateTimeString(),
+                'source' => 'firebase'
+            ];
+            return response()->json($data);
         }
 
-        $device = Device::first();
-
-        if (!$device) {
-            return response()->json(['message' => 'Tidak ada device ditemukan.'], 404);
+        // Jika object stdClass, cast ke array dan ulangi proses
+        if (!empty($raw) && is_object($raw)) {
+            $raw = (array) $raw;
+            $data = [
+                'device_id' => $raw['device_id'] ?? ($raw['deviceId'] ?? 0),
+                'voltage' => isset($raw['voltage']) ? (float)$raw['voltage'] : (float)($raw['voltage_v'] ?? 0),
+                'amperage' => isset($raw['amperage']) ? (float)$raw['amperage'] : (float)($raw['current'] ?? 0),
+                'watt' => isset($raw['watt']) ? (float)$raw['watt'] : (float)($raw['power'] ?? 0),
+                'timestamp' => $raw['timestamp'] ?? now()->toDateTimeString(),
+                'source' => 'firebase'
+            ];
+            return response()->json($data);
         }
 
-        $record = Record::create([
-            'device_id' => $device->id,
-            'voltage' => $data['voltage'] ?? 0,
-            'amperage' => $data['amperage'] ?? 0,
-            'watt' => $data['watt'] ?? 0,
-            'timestamp' => Carbon::now(),
-        ]);
+        // Jika firebase null/empty, fallback ke MySQL: ambil record terbaru
+        $latest = Record::orderBy('timestamp', 'desc')->first();
+        if ($latest) {
+            return response()->json([
+                'device_id' => $latest->device_id ?? 0,
+                'voltage' => (float) $latest->voltage,
+                'amperage' => (float) $latest->amperage,
+                'watt' => (float) $latest->watt,
+                'timestamp' => $latest->timestamp instanceof \Carbon\Carbon ? $latest->timestamp->toDateTimeString() : (string) $latest->timestamp,
+                'source' => 'mysql'
+            ]);
+        }
 
-        return response()->json([
-            'message' => 'Data berhasil disimpan ke MySQL',
-            'data' => $record
-        ]);
-    }
-
-    // endpoint buat API realtime (dipanggil dari JS di view)
-    public function getRealtime()
-    {
-        $data = $this->firebase->getData('powergo/realtime');
-        return response()->json($data ?? []);
+        // Fallback terakhir, semua nilai 0
+        return response()->json($fallback);
     }
 }
