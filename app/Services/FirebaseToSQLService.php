@@ -24,7 +24,7 @@ class FirebaseToSQLService
         foreach ($firebaseData as $item) {
             // Cek supaya tidak duplikat berdasarkan timestamp
             Record::updateOrCreate(
-                ['waktu' => $item['timestamp']], 
+                ['timestamp' => $item['timestamp']],
                 [
                     'voltage' => $item['V'] ?? $item['voltage'],
                     'amperage' => $item['A'] ?? $item['amperage'],
