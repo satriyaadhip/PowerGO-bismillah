@@ -87,7 +87,10 @@
 
                 <!-- 24 Hour Chart -->
                 <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col">
-                    <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan Daya (24 Jam)</h3>
+                    <div class="flex flex-row items-center justify-between w-full">
+                        <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan Daya (24 Jam)</h3>
+                        <span class="text-gray-500 text-sm ml-3">Terakhir update: {{ $lastCharge }}</span>
+                    </div>
                     <div class="w-full h-[250px] mb-4">
                         <canvas id="hourly-chart"></canvas>
                     </div>

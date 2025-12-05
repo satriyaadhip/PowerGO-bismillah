@@ -136,6 +136,12 @@ class GraphController extends Controller
         $weeklyTotalKwh    = $weeklyData->sum('kwh');
         $weeklyTotalCost   = Number::currency($weeklyData->sum('cost'), in: 'IDR', locale: 'id');
 
+        // LAST CHARGE
+        $lastRecord = Record::orderBy('timestamp', 'desc')->first();
+        $lastCharge = $lastRecord
+            ? Carbon::parse($lastRecord->timestamp)->format('d/m/Y H:i')
+            : '-';
+
         return view('dashboard.total_daya', [
             'paginator' => $records,
             'selectedDate' => $selectedDate->toDateString(),
@@ -148,6 +154,9 @@ class GraphController extends Controller
 
             'totalKwh'          => $totalKwh,
             'totalCost'         => $totalCost,
+
+            // Expose lastCharge to view
+            'lastCharge'        => $lastCharge,
 
             'weeklyData'        => $weeklyData,
             'weeklyChartLabels' => $weeklyChartLabels,
