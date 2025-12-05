@@ -16,13 +16,32 @@ class GraphController extends Controller
      */
     public function totalDaya(Request $request)
     {
-        // Pagination 24 record (per 24 jam)
-        $records = Record::where('timestamp', '>=', now()->startOfDay())
-            ->orderBy('timestamp', 'asc')
-            ->paginate(24);
+        // CUSTOMER DATA
+        $user = auth('web')->user();
+        $customer = $user->customer;
+        $pelangganId = $customer->pelanggan_id ?? '-';
+        $maxPower    = $customer->daya_va ?? 1300;
+        $billingType = ucfirst($customer->billing_type ?? 'Prabayar');
+
+        // Ambil tanggal
+        $selectedDate = $request->date
+            ? Carbon::parse($request->date)->startOfDay()
+            : now()->startOfDay();
+
+        $prevDate = $selectedDate->copy()->subDay()->format('Y-m-d');
+        $nextDate = $selectedDate->copy()->addDay()->format('Y-m-d');
+
+        // QUERY DATA
+        $records = Record::whereBetween('timestamp', [
+            $selectedDate->copy()->startOfDay(),
+            $selectedDate->copy()->endOfDay(),
+        ])->orderBy('timestamp', 'asc')->get();
 
         if ($records->isEmpty()) {
             return view('dashboard.total_daya', [
+                'selectedDate'      => $selectedDate->format('Y-m-d'),
+                'prevDate'          => $prevDate,
+                'nextDate'          => $nextDate,
                 'hourlyData'        => [],
                 'hourlyChartLabels' => [],
                 'hourlyChartData'   => [],
@@ -34,23 +53,26 @@ class GraphController extends Controller
                 'weeklyTotalCost'   => 0,
                 'totalKwh'          => 0,
                 'totalCost'         => 0,
-                'paginator'         => $records,
+
+                // Customer data
+                'pelangganId' => $pelangganId,
+                'maxPower'    => $maxPower,
+                'billingType' => $billingType,
             ]);
         }
 
-        /**
-         * ===============================
-         * FORMAT DATA 24 JAM
-         * ===============================
-         */
+        // FORMAT 1 JAM
         $hourlyData = $records->groupBy(function ($record) {
-            return Carbon::parse($record->timestamp)->format('H:00 - H:59');
-        })->map(function ($group) {
+            $ts = Carbon::parse($record->timestamp);
+            $start = $ts->format("H:00");
+            $end   = $ts->format("H:59");
+            return "$start - $end";
+        })->map(function ($group, $range) {
             $avgWatt = $group->avg('watt');
             $kwh     = round($avgWatt / 1000, 2);
 
             return [
-                'time' => Carbon::parse($group->first()->timestamp)->format('H:00'),
+                'time' => $range,
                 'watt' => round($avgWatt, 2),
                 'kwh'  => $kwh,
                 'cost' => round($kwh * 13750),
@@ -63,11 +85,36 @@ class GraphController extends Controller
         $totalKwh  = $hourlyData->sum('kwh');
         $totalCost = $hourlyData->sum('cost');
 
-        /**
-         * ===============================
-         * DATA 7 HARI TERAKHIR
-         * ===============================
-         */
+// FORMAT 30 MENIT
+// $hourlyData = $records->groupBy(function ($record) {
+//     $ts = Carbon::parse($record->timestamp);
+//     $minute = $ts->minute < 30 ? '00' : '30';
+
+//     $start = $ts->format("H:$minute");
+//     $end   = $minute === '00'
+//         ? $ts->format("H:30")
+//         : $ts->copy()->addHour()->format("H:00");
+
+//     return "$start - $end";
+// })->map(function ($group, $range) {
+//     $avgWatt = $group->avg('watt');
+//     $kwh     = round($avgWatt / 1000, 2);
+
+//     return [
+//         'time' => $range,
+//         'watt' => round($avgWatt, 2),
+//         'kwh'  => $kwh,
+//         'cost' => round($kwh * 13750),
+//     ];
+// })->values();
+
+// $hourlyChartLabels = $hourlyData->pluck('time')->toArray();
+// $hourlyChartData   = $hourlyData->pluck('watt')->toArray();
+
+// $totalKwh  = $hourlyData->sum('kwh');
+// $totalCost = $hourlyData->sum('cost');
+
+        // DATA 7 HARI
         $weeklyRaw = Record::selectRaw('DATE(timestamp) as date, AVG(watt) as avg_watt, SUM(watt)/1000 as kwh')
             ->where('timestamp', '>=', now()->subDays(7))
             ->groupBy('date')
@@ -86,28 +133,35 @@ class GraphController extends Controller
         $weeklyChartLabels = $weeklyData->pluck('date')->toArray();
         $weeklyChartKwh    = $weeklyData->pluck('kwh')->toArray();
         $weeklyChartCost   = $weeklyData->pluck('cost')->toArray();
+        $weeklyTotalKwh    = $weeklyData->sum('kwh');
+        $weeklyTotalCost   = Number::currency($weeklyData->sum('cost'), in: 'IDR', locale: 'id');
 
-        $weeklyTotalKwh  = $weeklyData->sum('kwh');
-        $weeklyTotalCost = Number::currency($weeklyData->sum('cost'), in: 'IDR', locale: 'id');
+        return view('dashboard.total_daya', [
+            'paginator' => $records,
+            'selectedDate' => $selectedDate->toDateString(),
+            'prevDate' => $prevDate,
+            'nextDate' => $nextDate,
 
-        $data = compact(
-            'hourlyData',
-            'hourlyChartLabels',
-            'hourlyChartData',
-            'totalKwh',
-            'totalCost',
-            'weeklyData',
-            'weeklyChartLabels',
-            'weeklyChartKwh',
-            'weeklyChartCost',
-            'weeklyTotalKwh',
-            'weeklyTotalCost'
-        );
-        $data['paginator'] = $records;
+            'hourlyData'        => $hourlyData,
+            'hourlyChartLabels' => $hourlyChartLabels,
+            'hourlyChartData'   => $hourlyChartData,
 
-        return view('dashboard.total_daya', $data);
+            'totalKwh'          => $totalKwh,
+            'totalCost'         => $totalCost,
+
+            'weeklyData'        => $weeklyData,
+            'weeklyChartLabels' => $weeklyChartLabels,
+            'weeklyChartKwh'    => $weeklyChartKwh,
+            'weeklyChartCost'   => $weeklyChartCost,
+            'weeklyTotalKwh'    => $weeklyTotalKwh,
+            'weeklyTotalCost'   => $weeklyTotalCost,
+
+            // Customer
+            'pelangganId' => $pelangganId,
+            'maxPower'    => $maxPower,
+            'billingType' => $billingType,
+        ]);
     }
-
 
     /**
      * =====================================================================
@@ -116,7 +170,14 @@ class GraphController extends Controller
      */
     public function sisaKwh()
     {
-        // DATA MINGGUAN (7 hari terakhir)
+        // CUSTOMER DATA
+        $user = auth('web')->user();
+        $customer = $user->customer;
+        $pelangganId = $customer->pelanggan_id ?? '-';
+        $maxPower    = $customer->daya_va ?? 1300;
+        $billingType = ucfirst($customer->billing_type ?? 'Prabayar');
+
+        // DATA MINGGUAN
         $weeklyData = Record::selectRaw('DATE(timestamp) as date, AVG(watt) as avg_watt, SUM(watt)/1000 as kwh')
             ->where('timestamp', '>=', now()->subDays(7))
             ->groupBy('date')
@@ -127,85 +188,177 @@ class GraphController extends Controller
                     'date'     => Carbon::parse($row->date)->format('d M'),
                     'avg_watt' => round($row->avg_watt, 2),
                     'kwh'      => round($row->kwh, 2),
-                    'cost'     => round($row->kwh * 13750, 0),
+                    'cost'     => round($row->kwh * 13750),
                 ];
             });
 
-        // RECORD 24 JAM (urut asc untuk table/graph)
+        // RECORD 24 JAM
         $records = Record::where('timestamp', '>=', now()->subDay())
             ->orderBy('timestamp', 'asc')
             ->get();
 
-        // Format per jam (H:00 - H:59)
         $hourlyData = $records->groupBy(function ($record) {
-            return Carbon::parse($record->timestamp)->format('H:00 - H:59');
-        })->map(function ($group, $hour) {
+            $ts = Carbon::parse($record->timestamp);
+            $start = $ts->format("H:00");
+            $end = $ts->format("H:59");
+            return "$start - $end";
+        })->map(function ($group, $range) {
             $kwh = round($group->avg('watt') / 1000, 2);
             return [
-                'time' => $hour,
+                'time' => $range,
                 'remaining_kwh' => max(40 - $kwh, 0),
-                'kwh' => $kwh,
+                'kwh'  => $kwh,
                 'cost' => round($kwh * 13750, 0),
             ];
         })->values();
 
-        // Chart & totals
         $hourlyChartLabels = $hourlyData->pluck('time')->toArray();
-        $hourlyChartData = $hourlyData->pluck('remaining_kwh')->toArray();
-        $hourlyKwh = $hourlyData->pluck('kwh')->toArray();
-        $totalKwh = $hourlyData->sum('kwh');
-        $totalCost = $hourlyData->sum('cost');
+        $hourlyChartData   = $hourlyData->pluck('remaining_kwh')->toArray();
+        $hourlyKwh         = $hourlyData->pluck('kwh')->toArray();
+        $totalKwh          = $hourlyData->sum('kwh');
+        $totalCost         = $hourlyData->sum('cost');
+        
 
         return view('dashboard.sisa_kwh', [
-            'weeklyData' => $weeklyData,
-            'hourlyData' => $hourlyData,
-            'hourlyChartLabels' => $hourlyChartLabels,
-            'hourlyChartData' => $hourlyChartData,
-            'hourlyKwh' => $hourlyKwh,
-            'totalKwh' => $totalKwh,
-            'totalCost' => $totalCost,
+            'weeklyData'       => $weeklyData,
+            'hourlyData'       => $hourlyData,
+            'hourlyChartLabels'=> $hourlyChartLabels,
+            'hourlyChartData'  => $hourlyChartData,
+            'hourlyKwh'        => $hourlyKwh,
+            'totalKwh'         => $totalKwh,
+            'totalCost'        => $totalCost,
+
+            // Customer
+            'pelangganId' => $pelangganId,
+            'maxPower'    => $maxPower,
+            'billingType' => $billingType,
         ]);
     }
-
-
-    /**
-     * =====================================================================
-     * SUMMARY UNTUK DASHBOARD
-     * =====================================================================
-     */
-    public function getTotalDayaSummary()
-    {
-        $records = Record::where('timestamp', '>=', now()->subDay())->get();
-
-        if ($records->isEmpty()) {
-            return [
-                'avgWatt' => 0,
-                'avgWh'   => 0,
-                'totalKwh' => 0,
-            ];
-        }
-
-        return [
-            'avgWatt' => round($records->avg('watt')),
-            'avgWh'   => round(($records->avg('watt') / 1000) * 1000),
-            'totalKwh' => round($records->sum('watt') / 1000, 2),
-        ];
-    }
-
-    public function getSisaKwhSummary()
-    {
-        $records = Record::where('timestamp', '>=', now()->subDay())->get();
-
-        if ($records->isEmpty()) {
-            return ['remainingKwh' => 0];
-        }
-
-        $used = round($records->avg('watt') / 1000, 2);
-
-        return ['remainingKwh' => max(40 - $used, 0)];
-    }
-
-
+    // public function totalDaya(Request $request)
+    // {
+    // //     /**
+    //      * ======================================
+    //      * PAGINATION & DATA HARI INI (24 JAM)
+    //      * ======================================
+    //      */
+    //     $records = Record::where('timestamp', '>=', now()->startOfDay())
+    //         ->orderBy('timestamp', 'asc')
+    //         ->paginate(24);
+    
+    //     // Jika Tidak Ada Data
+    //     if ($records->isEmpty()) {
+    //         return view('dashboard.total_daya', [
+    //             'hourlyData'         => [],
+    //             'hourlyChartLabels' => [],
+    //             'hourlyChartData'   => [],
+    //             'weeklyData'        => [],
+    //             'weeklyChartLabels'=> [],
+    //             'weeklyChartKwh'    => [],
+    //             'weeklyChartCost'   => [],
+    //             'weeklyTotalKwh'    => 0,
+    //             'weeklyTotalCost'   => 0,
+    //             'totalKwh'          => 0,
+    //             'totalCost'         => 0,
+    //             'paginator'         => $records,
+    //         ]);
+    //     }
+    
+    //     /**
+    //      * ======================================
+    //      * FORMAT DATA PER 30 MENIT (24 JAM)
+    //      * ======================================
+    //      */
+    //     $hourlyData = $records->groupBy(function ($record) {
+    //         $ts = Carbon::parse($record->timestamp);
+    
+    //         $minute = $ts->minute < 30 ? '00' : '30';
+    //         $start  = $ts->format('H:' . $minute);
+    
+    //         if ($minute === '00') {
+    //             $end = $ts->format('H:30');
+    //         } else {
+    //             $end = $ts->copy()->addHour()->format('H:00');
+    //         }
+    
+    //         return "$start - $end";
+    //     })
+    //     ->map(function ($group, $range) {
+    //         $avgWatt = $group->avg('watt');
+    //         $kwh     = round($avgWatt / 1000, 2);
+    
+    //         return [
+    //             'time' => $range,
+    //             'watt' => round($avgWatt, 2),
+    //             'kwh'  => $kwh,
+    //             'cost' => round($kwh * 13750),
+    //         ];
+    //     })
+    //     ->values();
+    
+    //     $hourlyChartLabels = $hourlyData->pluck('time')->toArray();
+    //     $hourlyChartData   = $hourlyData->pluck('watt')->toArray();
+    //     $totalKwh          = $hourlyData->sum('kwh');
+    //     $totalCost         = $hourlyData->sum('cost');
+    
+    //     /**
+    //      * ======================================
+    //      * DATA 7 HARI TERAKHIR
+    //      * ======================================
+    //      */
+    //     $weeklyRaw = Record::selectRaw('
+    //             DATE(timestamp) as date, 
+    //             AVG(watt) as avg_watt, 
+    //             SUM(watt)/1000 as kwh
+    //         ')
+    //         ->where('timestamp', '>=', now()->subDays(7))
+    //         ->groupBy('date')
+    //         ->orderBy('date', 'asc')
+    //         ->get();
+    
+    //     $weeklyData = $weeklyRaw->map(function ($row) {
+    //         return [
+    //             'date'     => Carbon::parse($row->date)->format('d M'),
+    //             'avg_watt' => round($row->avg_watt, 2),
+    //             'kwh'      => round($row->kwh, 2),
+    //             'cost'     => round($row->kwh * 13750),
+    //         ];
+    //     });
+    
+    //     $weeklyChartLabels = $weeklyData->pluck('date')->toArray();
+    //     $weeklyChartKwh    = $weeklyData->pluck('kwh')->toArray();
+    //     $weeklyChartCost   = $weeklyData->pluck('cost')->toArray();
+    
+    //     $weeklyTotalKwh  = $weeklyData->sum('kwh');
+    //     $weeklyTotalCost = Number::currency(
+    //         $weeklyData->sum('cost'),
+    //         in: 'IDR',
+    //         locale: 'id'
+    //     );
+    
+    //     /**
+    //      * ======================================
+    //      * KIRIM KE VIEW
+    //      * ======================================
+    //      */
+    //     $data = compact(
+    //         'hourlyData',
+    //         'hourlyChartLabels',
+    //         'hourlyChartData',
+    //         'totalKwh',
+    //         'totalCost',
+    //         'weeklyData',
+    //         'weeklyChartLabels',
+    //         'weeklyChartKwh',
+    //         'weeklyChartCost',
+    //         'weeklyTotalKwh',
+    //         'weeklyTotalCost'
+    //     );
+    
+    //     $data['paginator'] = $records;
+    
+    //     return view('dashboard.total_daya', $data);
+    // }
+    
     /**
      * =====================================================================
      * DASHBOARD SUMMARY
@@ -213,43 +366,29 @@ class GraphController extends Controller
      */
     public function summary()
     {
-        $daya = $this->getTotalDayaSummary();
-        $sisa = $this->getSisaKwhSummary();
+        // CUSTOMER DATA
+        $user = auth('web')->user();
+        $customer = $user->customer;
+        $pelangganId = $customer->pelanggan_id ?? '-';
+        $maxPower    = $customer->daya_va ?? 1300;
+        $billingType = ucfirst($customer->billing_type ?? 'Prabayar');
 
-        $records = Record::where('timestamp', '>=', now()->subDay())
-            ->orderBy('timestamp', 'asc')
-            ->paginate(24);
+        // TOTAL DAYA SUMMARY
+        $records = Record::where('timestamp', '>=', now()->subDay())->get();
 
-        $hourlyData = $records->groupBy(function ($record) {
-            return Carbon::parse($record->timestamp)->format('H:00 - H:59');
-        })->map(function ($group) {
-            $avgWatt = $group->avg('watt');
-            $kwh     = round($avgWatt / 1000, 2);
+        $avgWatt = $records->avg('watt') ?? 0;
+        $avgKwh  = $avgWatt / 1000;
+        $avgCost = round($avgKwh * 13750);
 
-            return [
-                'time' => Carbon::parse($group->first()->timestamp)->format('H:00'),
-                'watt' => round($avgWatt, 2),
-                'kwh'  => $kwh,
-                'cost' => round($kwh * 13750),
-            ];
-        })->values();
-
-        $totalCost = $hourlyData->sum('cost');
-
-        // Realtime Firebase
+        // REALTIME WATT
         $realtimeWatt = 0;
         try {
             $firebaseResponse = app(FirebaseController::class)->getRealtimeData();
             $data = $firebaseResponse->getData(true);
             $realtimeWatt = round($data['watt'] ?? 0);
-        } catch (\Exception $e) {
-        }
+        } catch (\Exception $e) {}
 
-        $avgKwh = $daya['avgWatt'] / 1000;
-        $avgCost = round($avgKwh * 13750);  // tarif listrik
-
-
-        // Last charge
+        // LAST CHARGE
         $lastRecord = Record::orderBy('timestamp', 'desc')->first();
         $lastCharge = $lastRecord
             ? Carbon::parse($lastRecord->timestamp)->format('d/m/Y H:i')
@@ -257,11 +396,15 @@ class GraphController extends Controller
 
         return view('dashboard.dashboard', [
             'realtimeWatt' => $realtimeWatt,
-            'avgWatt'      => $daya['avgWatt'],
+            'avgWatt'      => round($avgWatt),
             'avgCost'      => $avgCost,
-            'avgWh'        => $daya['avgWh'],
-            'remainingKwh' => $sisa['remainingKwh'],
+            'remainingKwh' => max(40 - $avgKwh, 0),
             'lastCharge'   => $lastCharge,
+
+            // Customer
+            'pelangganId' => $pelangganId,
+            'maxPower'    => $maxPower,
+            'billingType' => $billingType,
         ]);
     }
 }

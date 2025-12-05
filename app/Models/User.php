@@ -51,4 +51,9 @@ class User extends Authenticatable
         return $this->hasMany(Device::class);
     }
 
+    public function customer() //User agar punya relasi customer
+    {
+        return $this->hasOne(\App\Models\Customer::class);
+    }
+
 }

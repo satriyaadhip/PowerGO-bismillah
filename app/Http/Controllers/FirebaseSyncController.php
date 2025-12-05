@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FirebaseService;
 use App\Models\Record;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class FirebaseSyncController extends Controller
 {
@@ -18,9 +19,9 @@ class FirebaseSyncController extends Controller
     public function sync(): JsonResponse
     {
         // Sesuaikan dengan path data kamu di Firebase Realtime DB
-        $path = 'sensorData'; // contoh: root node berisi voltage, amperage, watt
+        $path = 'powergo/realtime';
         $data = $this->firebase->getData($path);
-
+        Log::info('DATA YG MASUK DARI FIREBASE:', (array) $data ?? []);
         if (!$data) {
             return response()->json(['message' => 'Tidak ada data dari Firebase.'], 404);
         }
