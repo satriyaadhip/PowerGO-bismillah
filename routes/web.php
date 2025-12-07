@@ -48,11 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Graph pages
     Route::prefix('dashboard')->group(function () {
         Route::get('/total_daya/{date?}', [GraphController::class, 'totalDaya'])->name('dashboard.total_daya');
-        Route::get('/sisa_kwh', [GraphController::class, 'sisaKwh'])->name('dashboard.sisa_kwh');
+        Route::get('/sisa_kwh/{date?}', [GraphController::class, 'sisaKwh'])->name('dashboard.sisa_kwh');
     });
 
     // Pembayaran
-    Route::get('/pembayaran', fn() => view('pembayaran.pembayaran'))->name('pembayaran');
+    Route::get('/pembayaran', [GraphController::class, 'pembayaran'])->name('pembayaran');
+    Route::get('/pembayaran/lanjut', [GraphController::class, 'pembayaranLanjut'])->name('pembayaran.lanjut');
 });
 
 

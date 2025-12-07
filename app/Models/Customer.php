@@ -15,6 +15,11 @@ class Customer extends Model
         'daya_va',
         'max_watt',
         'billing_type',
+        'kwh_balance',
+    ];
+
+    protected $casts = [
+        'kwh_balance' => 'decimal:2',
     ];
 
     public function user()

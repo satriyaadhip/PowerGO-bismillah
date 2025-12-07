@@ -9,6 +9,7 @@
     <!-- Exo font -->
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         tailwind.config = {
@@ -80,7 +81,8 @@
                                 </div>
                             </div>
         
-                            <!-- SISA KWH -->
+                            @if($billingType === 'prabayar' && $remainingKwh !== null)
+                            <!-- SISA KWH (Only for Prabayar) -->
                             <div class="flex flex-col flex-1 bg-[#eaeff4] shadow-md rounded-3xl p-4">
                                 <div class="relative w-24 h-24 mb-3 flex flex-col items-center justify-center">
                                     <svg class="absolute inset-0 w-full h-full transform -rotate-90"
@@ -113,6 +115,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
         
                         </div>
                     </div>
@@ -145,11 +148,32 @@
                         </div>
         
                     </div>
-        
                 </div>
-            </div>
-        
-            <!-- END LEFT COLUMN -->
+                <!-- SEPARATE 24 Hour Chart Card INSIDE LEFT COLUMN -->
+                <div class="bg-[#eaeff4] rounded-3xl shadow-lg p-4 flex flex-col mt-4">
+                    <div class="flex flex-row items-center justify-between w-full mb-2">
+                        <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan Daya (24 Jam)</h3>
+                        <span class="text-gray-500 text-sm ml-3">Terakhir update: {{ $lastCharge ?? '-' }}</span>
+                    </div>
+                    <div class="w-full h-[250px] mb-4">
+                        <canvas class="bg-[#f5f8f9] rounded-2xl" id="hourly-chart-home"></canvas>
+                    </div>
+                    <div class="w-full flex justify-end">
+                        <a href="{{ route('dashboard.total_daya') }}"
+                           class="bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800 hover:bg-gray-100">
+                            Lihat Detail
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-1" fill="none"
+                                 viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9" fill="#000000"/>
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="1.5"
+                                      stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- END SEPARATE 24 Hour Chart Card INSIDE LEFT COLUMN -->
+            </div> <!-- END LEFT COLUMN -->
 
             <!-- ========== RIGHT COLUMN ========== -->
             <div class="bg-[#d5dbea] shadow-sm rounded-3xl p-4 flex-1">
@@ -179,11 +203,18 @@
 
                     </div>
                 </div>
+                <!-- BOTTOM — Weekly Chart (Home) -->
+                <div class="bg-white rounded-3xl shadow-lg p-4 mt-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Grafik Penggunaan 7 Hari Terakhir</h3>
+                    <div class="w-full h-[260px]">
+                        <canvas id="weekly-chart-home"></canvas>
+                    </div>
+                </div>
+                <!-- END BOTTOM -->
             </div>
             <!-- END RIGHT COLUMN -->
+        </div> <!-- END flex-row -->
 
-        </div>
-        <!-- END container mx-auto flex flex-col md:flex-row gap-4 py-2 -->
     </div>
     <!-- END bg-[#E1DFEC] mx-auto px-2 sm:px-4 -->
 
@@ -213,6 +244,131 @@
 
     setInterval(fetchRealtimePower, 5000);
     fetchRealtimePower();
+</script>
+
+<script>
+    @if($billingType === 'prabayar' && $remainingKwh !== null)
+    function updateRemainingKwhCircle() {
+        const remainingKwh = {{ $remainingKwh }};
+        const circle = document.querySelector('.remaining-kwh-circle');
+        
+        if (!circle) return;
+        
+        let percent, color;
+        
+        if (remainingKwh > 20) {
+            // kWh > 20: full hijau
+            percent = 100;
+            color = '#22c55e'; // green
+        } else if (remainingKwh >= 10) {
+            // 10 <= kWh <= 20: full kuning
+            percent = 100;
+            color = '#facc15'; // yellow
+        } else {
+            // kWh < 10: merah dengan persentase berdasarkan sisa kWh
+            // Persentase = (kWh / 10) * 100
+            percent = (remainingKwh / 10) * 100;
+            color = '#ef4444'; // red
+        }
+        
+        // Update circle
+        circle.style.strokeDashoffset = 264 - (264 * percent / 100);
+        circle.style.stroke = color;
+    }
+    
+    // Initialize on page load
+    updateRemainingKwhCircle();
+    
+    // Update periodically (every 5 seconds)
+    setInterval(updateRemainingKwhCircle, 5000);
+    @endif
+</script>
+
+<script>
+    const hourlyLabelsHome = @json($hourlyChartLabels ?? []);
+    const hourlyDataHome = @json($hourlyChartData ?? []);
+    const weeklyLabelsHome = @json($weeklyChartLabels ?? []);
+    const weeklyKwhHome = @json($weeklyChartKwh ?? []);
+    const weeklyCostHome = @json($weeklyChartCost ?? []);
+
+    // Hourly chart for home
+    if (document.getElementById('hourly-chart-home')) {
+        new Chart(document.getElementById('hourly-chart-home'), {
+            type: 'line',
+            data: {
+                labels: hourlyLabelsHome,
+                datasets: [{
+                    label: 'Daya (W)',
+                    data: hourlyDataHome,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.15)',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    // Weekly chart for home
+    if (document.getElementById('weekly-chart-home')) {
+        new Chart(document.getElementById('weekly-chart-home'), {
+            type: 'line',
+            data: {
+                labels: weeklyLabelsHome,
+                datasets: [
+                    {
+                        label: 'kWh',
+                        data: weeklyKwhHome,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.15)',
+                        yAxisID: 'y',
+                        tension: 0.4,
+                        borderWidth: 3,
+                        fill: true
+                    },
+                    {
+                        label: 'Biaya (Rp)',
+                        data: weeklyCostHome,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34,197,94,0.15)',
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        borderWidth: 3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'kWh'
+                        }
+                    },
+                    y1: {
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Biaya'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+    }
 </script>
 
 </html>

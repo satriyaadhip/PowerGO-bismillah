@@ -50,9 +50,9 @@
             </div>
 
             <div class="bg-white rounded-2xl p-4 shadow-sm">
-                <p class="text-sm text-gray-600 mb-1">Rata-rata Watt</p>
+                <p class="text-sm text-gray-600 mb-1">Sisa kWh</p>
                 <p class="text-2xl font-bold text-gray-900">
-                    {{ number_format($hourlyData->avg('watt') ?? 0, 0) }} W
+                    {{ number_format($hourlyData->first()['remaining_kwh'] ?? 0, 2) }} <span class="text-base font-normal">kWh</span>
                 </p>
             </div>
 
@@ -74,9 +74,9 @@
 
                 <!-- Chart -->
                 <div class="bg-white rounded-3xl shadow p-6 mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Penggunaan Listrik</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Sisa kWh Harian (7 Hari Terakhir)</h3>
                     <div class="relative w-full h-[300px]">
-                        <canvas id="hourly-chart"></canvas>
+                        <canvas id="daily-chart"></canvas>
                     </div>
                 </div>
 
@@ -85,40 +85,63 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Penggunaan Per Jam</h3>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <a href="{{ route('dashboard.sisa_kwh', ['date' => $prevDate]) }}"
+                                class="px-3 py-2 bg-gray-200 rounded-lg">
+                                &lt; {{ \Carbon\Carbon::parse($prevDate)->translatedFormat('l') }}
+                            </a>
+
+                            <h2 class="font-bold text-lg">
+                                {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d M Y') }}
+                            </h2>
+
+                            <a href="{{ route('dashboard.sisa_kwh', ['date' => $nextDate]) }}"
+                                class="px-3 py-2 bg-gray-200 rounded-lg">
+                                {{ \Carbon\Carbon::parse($nextDate)->translatedFormat('l') }} &gt;
+                            </a>
+                        </div>
+                        <table class="w-full table-fixed">
+                            <colgroup>
+                              <col style="width:40%"/>   {{-- Waktu --}}
+                              <col style="width:20%"/>   {{-- Sisa kWh --}}
+                              <col style="width:20%"/>   {{-- kWh --}}
+                              <col style="width:20%"/>   {{-- Biaya --}}
+                            </colgroup>
+                        
                             <thead>
-                                <tr class="border-b-2 border-gray-200">
-                                    <th class="py-3 px-4 text-left">Waktu</th>
-                                    <th class="py-3 px-4 text-right">Watt</th>
-                                    <th class="py-3 px-4 text-right">kWh</th>
-                                    <th class="py-3 px-4 text-right">Biaya (Rp)</th>
-                                </tr>
+                              <tr class="text-left text-gray-600 text-sm border-b">
+                                <th class="p-3">Waktu</th>
+                                <th class="p-3 text-right">Sisa kWh</th>
+                                <th class="p-3 text-right">kWh</th>
+                                <th class="p-3 text-right">Biaya</th>
+                              </tr>
                             </thead>
-
+                        
                             <tbody>
-
-                                {{-- ganti loop lama yang menggunakan hourlyKwh --}}
-                                @foreach ($hourlyData as $data)
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                        <td class="py-3 px-4 text-gray-900">{{ $data['time'] }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900 font-semibold">
-                                            {{ number_format($data['remaining_kwh'], 2) }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900">
-                                            {{ number_format($data['kwh'], 2) }}</td>
-                                        <td class="py-3 px-4 text-right text-gray-900">
-                                            {{ number_format($data['cost'], 0, ',', '.') }}</td>
-                                    </tr>
-                                @endforeach
-
-                                <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
-                                    <td class="py-3 px-4">Total</td>
-                                    <td class="py-3 px-4 text-right">-</td>
-                                    <td class="py-3 px-4 text-right">{{ number_format($totalKwh, 2) }}</td>
-                                    <td class="py-3 px-4 text-right">{{ number_format($totalCost, 0, ',', '.') }}</td>
+                              @forelse ($hourlyData as $row)
+                                <tr class="border-b hover:bg-gray-50">
+                                  <td class="p-3 align-middle">{{ $row['time'] }}</td>
+                                  <td class="p-3 align-middle text-right">{{ number_format($row['remaining_kwh'], 2) }}</td>
+                                  <td class="p-3 align-middle text-right">{{ number_format($row['kwh'], 2) }}</td>
+                                  <td class="p-3 align-middle text-right">Rp {{ number_format($row['cost'], 0, ',', '.') }}</td>
                                 </tr>
-
+                              @empty
+                                <tr>
+                                  <td colspan="4" class="p-4 text-center text-gray-500">Tidak ada data untuk tanggal ini.</td>
+                                </tr>
+                              @endforelse
                             </tbody>
-                        </table>
+                        
+                            <tfoot>
+                              <tr class="bg-gray-100 font-semibold">
+                                <td class="p-3">Total</td>
+                                {{-- kosongkan cell kedua supaya label Total tetap kiri --}}
+                                <td class="p-3"></td>
+                                <td class="p-3 text-right">{{ number_format($totalKwh ?? 0, 2) }}</td>
+                                <td class="p-3 text-right">Rp {{ number_format($totalCost ?? 0, 0, ',', '.') }}</td>
+                              </tr>
+                            </tfoot>
+                          </table>
                     </div>
                 </div>
 
@@ -134,6 +157,7 @@
                         <thead>
                             <tr class="border-b-2 border-gray-200">
                                 <th class="py-2 text-left">Tanggal</th>
+                                <th class="py-2 text-right">Sisa kWh</th>
                                 <th class="py-2 text-right">kWh</th>
                                 <th class="py-2 text-right">Biaya</th>
                             </tr>
@@ -145,12 +169,13 @@
                                     <td class="py-2 text-gray-900">
                                         {{ $w['date'] }}
                                     </td>
-                                    <td class="py-2 text-right">{{ $w['kwh'] }}</td>
-                                    <td class="py-2 text-right">{{ $w['cost'] }}</td>
+                                    <td class="py-2 text-right font-semibold">{{ number_format($w['remaining_kwh'], 2) }}</td>
+                                    <td class="py-2 text-right">{{ number_format($w['kwh'], 2) }}</td>
+                                    <td class="py-2 text-right">{{ number_format($w['cost'], 0, ',', '.') }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="py-4 text-center text-gray-500">
+                                    <td colspan="4" class="py-4 text-center text-gray-500">
                                         Tidak ada data
                                     </td>
                                 </tr>
@@ -167,18 +192,18 @@
 
 
     <script>
-        const hourlyLabel = @json($hourlyChartLabels);
-        const hourlyData = @json($hourlyChartData);
+        const dailyLabel = @json($dailyChartLabels ?? []);
+        const dailyData = @json($dailyChartData ?? []);
 
-        const ctx = document.getElementById('hourly-chart').getContext('2d');
+        const ctx = document.getElementById('daily-chart').getContext('2d');
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: hourlyLabel,
+                labels: dailyLabel,
                 datasets: [{
-                    label: 'Watt',
-                    data: hourlyData,
+                    label: 'Sisa kWh',
+                    data: dailyData,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.15)',
                     tension: 0.35,
@@ -198,7 +223,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: v => v + ' W'
+                            callback: v => v + ' kWh'
                         }
                     }
                 }
