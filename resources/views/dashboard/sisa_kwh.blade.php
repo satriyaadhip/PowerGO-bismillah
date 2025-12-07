@@ -35,28 +35,28 @@
 
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="bg-white rounded-2xl p-4 shadow-lg">
                 <p class="text-sm text-gray-600 mb-1">Total kWh (24 Jam)</p>
                 <p class="text-2xl font-bold text-gray-900">
                     {{ number_format($totalKwh, 2) }} <span class="text-base font-normal">kWh</span>
                 </p>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="bg-white rounded-2xl p-4 shadow-lg">
                 <p class="text-sm text-gray-600 mb-1">Total Biaya</p>
                 <p class="text-2xl font-bold text-gray-900">
                     Rp {{ number_format($totalCost, 0, ',', '.') }}
                 </p>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="bg-white rounded-2xl p-4 shadow-lg">
                 <p class="text-sm text-gray-600 mb-1">Sisa kWh</p>
                 <p class="text-2xl font-bold text-gray-900">
                     {{ number_format($hourlyData->first()['remaining_kwh'] ?? 0, 2) }} <span class="text-base font-normal">kWh</span>
                 </p>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="bg-white rounded-2xl p-4 shadow-lg">
                 <p class="text-sm text-gray-600 mb-1">Rata-rata kWh</p>
                 <p class="text-2xl font-bold text-gray-900">
                     {{ number_format($hourlyData->avg('kwh') ?? 0, 2) }} kWh
@@ -73,7 +73,7 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Data Harian (24 Jam)</h3>
 
                 <!-- Chart -->
-                <div class="bg-white rounded-3xl shadow p-6 mb-4">
+                <div class="bg-white rounded-3xl shadow-lg p-6 mb-4">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Sisa kWh Harian (7 Hari Terakhir)</h3>
                     <div class="relative w-full h-[300px]">
                         <canvas id="daily-chart"></canvas>
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white rounded-3xl shadow p-6">
+                <div class="bg-white rounded-3xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Penggunaan Per Jam</h3>
 
                     <div class="overflow-x-auto">
@@ -152,7 +152,7 @@
 
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Data 7 Hari Terakhir</h3>
 
-                <div class="bg-white rounded-3xl shadow p-5">
+                <div class="bg-white rounded-3xl shadow-lg p-5">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b-2 border-gray-200">

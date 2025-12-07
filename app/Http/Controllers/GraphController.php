@@ -13,6 +13,134 @@ use App\Helpers\Tarif;
 class GraphController extends Controller
 {
     /**
+     * Calculate remaining kWh for a customer based on kwh_balance and actual usage
+     * This ensures consistency across all methods
+     * 
+     * @param \App\Models\Customer $customer
+     * @param Carbon|null $fromDate Start date for usage calculation (default: start of today)
+     * @return float|null Remaining kWh (null for pascabayar)
+     */
+    protected function calculateRemainingKwh($customer, $fromDate = null)
+    {
+        if ($customer->billing_type !== 'prabayar') {
+            return null;
+        }
+
+        $baseBalance = $customer->kwh_balance ?? 0;
+        
+        // Default to start of today if not specified
+        if ($fromDate === null) {
+            $fromDate = now()->startOfDay();
+        }
+        
+        // Calculate total kWh used from fromDate to now
+        $records = Record::where('timestamp', '>=', $fromDate)
+            ->orderBy('timestamp', 'asc')
+            ->get();
+        
+        if ($records->isEmpty()) {
+            return $baseBalance;
+        }
+        
+        // Group records by hour and calculate kWh per hour
+        $hourlyUsage = $records->groupBy(function ($record) {
+            $ts = Carbon::parse($record->timestamp);
+            return $ts->format("H");
+        })->map(function ($group) {
+            $avgWatt = $group->avg('watt');
+            return round($avgWatt / 1000, 2); // kWh per hour
+        });
+        
+        $totalKwhUsed = $hourlyUsage->sum();
+        
+        // Get realtime watt and calculate additional usage since last record
+        $realtimeKwhAdditional = 0;
+        try {
+            $lastRecord = Record::orderBy('timestamp', 'desc')->first();
+            if ($lastRecord) {
+                $firebaseResponse = app(FirebaseController::class)->getRealtimeData();
+                $data = $firebaseResponse->getData(true);
+                $currentWatt = $data['watt'] ?? 0;
+                
+                $lastRecordTime = Carbon::parse($lastRecord->timestamp);
+                $minutesSinceLastRecord = now()->diffInMinutes($lastRecordTime);
+                
+                // Only calculate if more than 5 minutes have passed (to avoid double counting)
+                if ($minutesSinceLastRecord > 5) {
+                    $hoursSinceLastRecord = $minutesSinceLastRecord / 60;
+                    $realtimeKwhAdditional = ($currentWatt / 1000) * $hoursSinceLastRecord;
+                }
+            }
+        } catch (\Exception $e) {
+            // If realtime fetch fails, just use 0
+        }
+        
+        // Remaining = base balance - total used - realtime usage
+        return max($baseBalance - $totalKwhUsed - $realtimeKwhAdditional, 0);
+    }
+
+    /**
+     * Update kwh_balance in database based on actual usage
+     * This calculates remaining kWh and updates the database to keep it in sync
+     * 
+     * @param \App\Models\Customer $customer
+     * @return void
+     */
+    public function updateKwhBalanceFromUsage($customer)
+    {
+        if ($customer->billing_type !== 'prabayar') {
+            return;
+        }
+
+        // Calculate remaining kWh using the same logic
+        $remainingKwh = $this->calculateRemainingKwh($customer);
+        
+        if ($remainingKwh === null) {
+            return;
+        }
+        
+        // Only update if there's a significant difference (to avoid constant updates)
+        // This syncs the database with the calculated remaining kWh
+        if (abs($customer->kwh_balance - $remainingKwh) > 0.01) {
+            $customer->update(['kwh_balance' => $remainingKwh]);
+        }
+    }
+
+    /**
+     * =====================================================================
+     * API ENDPOINT - UPDATE KWH BALANCE REALTIME
+     * =====================================================================
+     */
+    public function updateKwhBalanceRealtime()
+    {
+        $user = auth('web')->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $customer = $user->customer;
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
+
+        // Update kwh_balance based on actual usage
+        $this->updateKwhBalanceFromUsage($customer);
+        
+        // Refresh to get updated value
+        $customer->refresh();
+        
+        // Calculate remaining kWh
+        $remainingKwh = $this->calculateRemainingKwh($customer);
+
+        return response()->json([
+            'success' => true,
+            'kwh_balance' => (float) $customer->kwh_balance,
+            'remaining_kwh' => $remainingKwh !== null ? (float) $remainingKwh : null,
+            'updated_at' => $customer->updated_at->toIso8601String(),
+        ]);
+    }
+
+    /**
      * =====================================================================
      * HALAMAN TOTAL DAYA (DETAIL)
      * =====================================================================
@@ -249,7 +377,12 @@ class GraphController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Get current balance and calculate remaining kWh per day
+        // Update kwh_balance based on actual usage (sync to database)
+        $this->updateKwhBalanceFromUsage($customer);
+        // Refresh customer to get updated balance
+        $customer->refresh();
+        
+        // Get current balance from database (after sync)
         $currentBalance = $customer->kwh_balance ?? 0;
         
         // Calculate daily remaining kWh (working backwards from current balance)
@@ -357,16 +490,19 @@ class GraphController extends Controller
         // =============================
         // FORMAT DATA PER JAM
         // =============================
+        // Calculate remaining kWh for each hour (accumulative)
+        $runningKwhUsed = 0;
         $hourlyData = $records->groupBy(function ($record) {
             $ts = Carbon::parse($record->timestamp);
             $start = $ts->format("H:00");
             $end = $ts->format("H:59");
             return "$start - $end";
-        })->map(function ($group, $range) use ($currentBalance, $tarif) {
+        })->map(function ($group, $range) use ($currentBalance, $tarif, &$runningKwhUsed) {
             $kwh = round($group->avg('watt') / 1000, 2);
+            $runningKwhUsed += $kwh; // Accumulate usage
             return [
                 'time' => $range,
-                'remaining_kwh' => max($currentBalance - $kwh, 0),
+                'remaining_kwh' => max($currentBalance - $runningKwhUsed, 0),
                 'kwh'  => $kwh,
                 'cost' => round($kwh * $tarif, 0),
             ];
@@ -503,11 +639,14 @@ class GraphController extends Controller
         // Tarif dinamis berdasarkan daya VA
         $tarif = \App\Helpers\Tarif::getTarifPerKwh($maxPower);
 
-        // Sisa kWh calculation (for Prabayar)
-        $records = Record::where('timestamp', '>=', now()->subDay())->get();
-        $avgWatt = $records->avg('watt') ?? 0;
-        $avgKwh = $avgWatt / 1000;
-        $remainingKwh = max(40 - $avgKwh, 0);
+        // Update kwh_balance based on actual usage (sync to database)
+        if ($billingTypeRaw === 'prabayar') {
+            $this->updateKwhBalanceFromUsage($customer);
+            $customer->refresh();
+        }
+
+        // Sisa kWh calculation (for Prabayar) - use helper for consistency
+        $remainingKwh = $this->calculateRemainingKwh($customer);
 
         // LAST CHARGE
         $lastRecord = Record::orderBy('timestamp', 'desc')->first();
@@ -836,15 +975,34 @@ class GraphController extends Controller
         } catch (\Exception $e) {
         }
 
-        // LAST CHARGE
+        // LAST CHARGE (from Record)
         $lastRecord = Record::orderBy('timestamp', 'desc')->first();
         $lastCharge = $lastRecord ? Carbon::parse($lastRecord->timestamp)->format('d/m/Y H:i') : '-';
 
-        // Remaining kWh: Use kwh_balance for prabayar, null for pascabayar
-        $remainingKwh = null;
+        // LAST TOPUP (from Transaction - for Prabayar only)
+        $lastTopup = '-';
         if ($billingTypeRaw === 'prabayar') {
-            $remainingKwh = $customer->kwh_balance ?? 0;
+            $lastTransaction = Transaction::where('customer_id', $customer->id)
+                ->where('billing_type', 'prabayar')
+                ->where('status', 'completed')
+                ->whereNotNull('kwh')
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($lastTransaction) {
+                $lastTopup = Carbon::parse($lastTransaction->created_at)->format('d/m/Y H:i');
+            }
         }
+
+        // Update kwh_balance based on actual usage (sync to database)
+        if ($billingTypeRaw === 'prabayar') {
+            $this->updateKwhBalanceFromUsage($customer);
+            // Refresh customer to get updated balance
+            $customer->refresh();
+        }
+
+        // Remaining kWh: Use helper method for consistency
+        $remainingKwh = $this->calculateRemainingKwh($customer);
 
         return view('dashboard.dashboard', [
             'realtimeWatt' => $realtimeWatt,
@@ -852,6 +1010,7 @@ class GraphController extends Controller
             'avgCost'      => $avgCost,
             'remainingKwh' => $remainingKwh,
             'lastCharge'   => $lastCharge,
+            'lastTopup'    => $lastTopup,
             'hourlyChartLabels' => $hourlyChartLabels,
             'hourlyChartData'   => $hourlyChartData,
             'weeklyChartLabels' => $weeklyChartLabels,

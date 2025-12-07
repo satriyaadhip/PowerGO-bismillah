@@ -42,7 +42,7 @@
                             <span class="text-2xl font-bold text-gray-900 total-power">0</span>W
                         </p>
                         <span class="text-base font-normal">/</span>
-                        <p class="text-base font-semibold"><span class="text-2xl font-bold">1300</span>W</p>
+                        <p class="text-base font-semibold"><span class="text-2xl font-bold max-power">{{ $maxPower }}</span>W</p>
                     </div>
                 </div>
 
@@ -71,7 +71,7 @@
                 <div class="bg-white rounded-2xl p-4 shadow-lg">
                     <p class="text-sm text-gray-600 mb-1">Total Biaya</p>
                     <p class="text-2xl font-bold text-gray-900">
-                        {{ $weeklyTotalCost }}
+                        Rp {{ number_format($weeklyTotalCost, 0, ',', '.') }}
                     </p>
                     <p class="text-xs text-gray-500 mt-1">7 hari</p>
                 </div>
@@ -244,6 +244,8 @@
 
     <!-- ========================= REALTIME (Volt, Ampere & Watt) ========================= -->
     <script>
+        const maxPower = {{ $maxPower }};
+        
         async function fetchRealtimePower() {
             const res = await fetch('/api/realtime');
             const data = await res.json();
@@ -251,6 +253,7 @@
             document.querySelector('.total-volt').textContent = Math.round(data?.voltage ?? 0);
             document.querySelector('.total-amp').textContent = data?.amperage ?? 0;
             document.querySelector('.total-power').textContent = Math.round(data?.watt ?? 0);
+            document.querySelector('.max-power').textContent = maxPower;
         }
 
         setInterval(fetchRealtimePower, 5000);

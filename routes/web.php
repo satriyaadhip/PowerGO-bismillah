@@ -66,6 +66,14 @@ Route::prefix('api')->group(function () {
     Route::get('/realtime/device', [DayaController::class, 'getRealtimePower'])->name('api.realtime.get');
 });
 
+// ==============================
+// API (dengan auth) — untuk update kwh_balance realtime
+// ==============================
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::post('/kwh-balance/update', [GraphController::class, 'updateKwhBalanceRealtime'])->name('api.kwh-balance.update');
+    Route::get('/kwh-balance', [GraphController::class, 'updateKwhBalanceRealtime'])->name('api.kwh-balance.get');
+});
+
 
 // ==============================
 // SYNC

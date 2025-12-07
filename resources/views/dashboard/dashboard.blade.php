@@ -124,9 +124,9 @@
                     <div class="flex flex-col gap-3">
         
                         <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col justify-between flex-1">
-                            <h2 class="font-semibold text-gray-500">Terakhir pengisian daya</h2>
+                            <h2 class="font-semibold text-gray-500">Terakhir topup</h2>
                             <div class="flex justify-between items-center mt-auto">
-                                <p class="text-xl font-semibold">{{ $lastCharge }}</p>
+                                <p class="text-xl font-semibold">{{ $lastTopup ?? '-' }}</p>
                                 <img src="{{ asset('images/icon_kWh.png') }}" class="w-10 h-10">
                             </div>
                         </div>
@@ -150,26 +150,13 @@
                     </div>
                 </div>
                 <!-- SEPARATE 24 Hour Chart Card INSIDE LEFT COLUMN -->
-                <div class="bg-[#eaeff4] rounded-3xl shadow-lg p-4 flex flex-col mt-4">
-                    <div class="flex flex-row items-center justify-between w-full mb-2">
+                <div class="bg-white rounded-3xl shadow-lg p-4 flex flex-col mt-4">
+                    <div class="flex flex-row items-center justify-between w-full">
                         <h3 class="text-lg font-bold text-gray-900">Grafik Penggunaan Daya (24 Jam)</h3>
                         <span class="text-gray-500 text-sm ml-3">Terakhir update: {{ $lastCharge ?? '-' }}</span>
                     </div>
                     <div class="w-full h-[250px] mb-4">
-                        <canvas class="bg-[#f5f8f9] rounded-2xl" id="hourly-chart-home"></canvas>
-                    </div>
-                    <div class="w-full flex justify-end">
-                        <a href="{{ route('dashboard.total_daya') }}"
-                           class="bg-[#f5f8f9] shadow-sm rounded-2xl p-3 flex justify-between items-center text-medium font-bold text-gray-800 hover:bg-gray-100">
-                            Lihat Detail
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-1" fill="none"
-                                 viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="9" fill="#000000"/>
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="1.5"
-                                      stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5"/>
-                            </svg>
-                        </a>
+                        <canvas id="hourly-chart-home"></canvas>
                     </div>
                 </div>
                 <!-- END SEPARATE 24 Hour Chart Card INSIDE LEFT COLUMN -->
@@ -178,6 +165,19 @@
             <!-- ========== RIGHT COLUMN ========== -->
             <div class="bg-[#d5dbea] shadow-sm rounded-3xl p-4 flex-1">
                 <h1 class="text-lg font-bold mb-4">Pengguna</h1>
+                
+                @if($billingType === 'prabayar' && $remainingKwh !== null && $remainingKwh < 20)
+                <!-- Alert Banner for Low kWh -->
+                <div class="alert-banner-kwh flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-yellow-300/80 rounded-2xl p-4 mb-6 shadow-md border border-yellow-400/30">
+                    <div>
+                        <p class="text-base font-medium text-gray-900">
+                            Sisa kWh <span class="font-semibold kwh-value">{{ number_format($remainingKwh, 2) }}</span>
+                        </p>
+                        <p class="text-sm text-gray-600 mt-1">Saldo menipis — lakukan pengisian agar layanan tetap aktif.</p>
+                    </div>
+                </div>
+                @endif
+                
                 <!-- Customer Info -->
                 <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -248,39 +248,78 @@
 
 <script>
     @if($billingType === 'prabayar' && $remainingKwh !== null)
-    function updateRemainingKwhCircle() {
-        const remainingKwh = {{ $remainingKwh }};
-        const circle = document.querySelector('.remaining-kwh-circle');
-        
-        if (!circle) return;
-        
-        let percent, color;
-        
-        if (remainingKwh > 20) {
-            // kWh > 20: full hijau
-            percent = 100;
-            color = '#22c55e'; // green
-        } else if (remainingKwh >= 10) {
-            // 10 <= kWh <= 20: full kuning
-            percent = 100;
-            color = '#facc15'; // yellow
-        } else {
-            // kWh < 10: merah dengan persentase berdasarkan sisa kWh
-            // Persentase = (kWh / 10) * 100
-            percent = (remainingKwh / 10) * 100;
-            color = '#ef4444'; // red
+    let baseRemainingKwh = {{ $remainingKwh }};
+    
+    async function updateRemainingKwhRealtime() {
+        try {
+            // Call API to update kwh_balance in database and get latest value
+            const res = await fetch('/api/kwh-balance', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.remaining_kwh !== null) {
+                    baseRemainingKwh = data.remaining_kwh;
+                }
+            }
+            
+            // Update display
+            const remainingKwhElement = document.querySelector('.remaining-kwh');
+            if (remainingKwhElement) {
+                remainingKwhElement.textContent = baseRemainingKwh.toFixed(2);
+            }
+            
+            // Update alert banner if exists
+            const alertBanner = document.querySelector('.alert-banner-kwh');
+            if (alertBanner) {
+                const kwhSpan = alertBanner.querySelector('.kwh-value');
+                if (kwhSpan) {
+                    kwhSpan.textContent = baseRemainingKwh.toFixed(2);
+                }
+                
+                // Show/hide alert based on threshold
+                if (baseRemainingKwh < 20) {
+                    alertBanner.style.display = 'flex';
+                } else {
+                    alertBanner.style.display = 'none';
+                }
+            }
+            
+            // Update circle
+            const circle = document.querySelector('.remaining-kwh-circle');
+            if (!circle) return;
+            
+            let percent, color;
+            
+            if (baseRemainingKwh > 20) {
+                percent = 100;
+                color = '#22c55e';
+            } else if (baseRemainingKwh >= 10) {
+                percent = 100;
+                color = '#facc15';
+            } else {
+                percent = (baseRemainingKwh / 10) * 100;
+                color = '#ef4444';
+            }
+            
+            circle.style.strokeDashoffset = 264 - (264 * percent / 100);
+            circle.style.stroke = color;
+        } catch (error) {
+            console.error('Error updating remaining kWh:', error);
         }
-        
-        // Update circle
-        circle.style.strokeDashoffset = 264 - (264 * percent / 100);
-        circle.style.stroke = color;
     }
     
     // Initialize on page load
-    updateRemainingKwhCircle();
+    updateRemainingKwhRealtime();
     
-    // Update periodically (every 5 seconds)
-    setInterval(updateRemainingKwhCircle, 5000);
+    // Update periodically (every 10 seconds) - sync with database
+    setInterval(updateRemainingKwhRealtime, 10000);
     @endif
 </script>
 
