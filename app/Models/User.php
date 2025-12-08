@@ -45,4 +45,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function devices()
+    {
+        return $this->hasMany(Device::class);
+    }
+
+    public function customer() //User agar punya relasi customer
+    {
+        return $this->hasOne(\App\Models\Customer::class);
+    }
+
 }

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran | PowerGO</title>
+    <!-- Exo font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Exo', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-[#E1DFEC] text-gray-900 font-sans">
+    <x-header />
+    <div class="container mx-auto mb-4 p-4 bg-[#D5DBEA] rounded-3xl">
+        <!-- Flex container for side by side cards -->
+        <div class="bg-[#eaeff4] rounded-3xl p-4">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Detail listrik pelanggan</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <p class="text-sm text-gray-600 mb-1">Sisa kWh</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($sisaKwh, 2) }} <span class="text-base font-normal">kWh</span></p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <p class="text-sm text-gray-600 mb-1">ID Pelanggan</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $pelangganId }}</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <p class="text-sm text-gray-600 mb-1">Nama pelanggan</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $nama }}</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <p class="text-sm text-gray-600 mb-1">Jenis Pelanggan</p>
+                    <p class="text-xl font-bold text-gray-900">{{ $jenis }}</p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <p class="text-sm text-gray-600 mb-1">Isi Terakhir</p>
+                    <p class="text-xl font-bold text-gray-900">{{ $isiTerakhir }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mx-auto p-4 bg-[#D5DBEA] rounded-3xl">
+        <!-- Pembayaran Section -->
+        <div class="flex flex-col gap-4">
+            @if($billingType === 'prabayar')
+                <!-- PRABAYAR VIEW -->
+                <div class="bg-[#eaeff4] rounded-3xl p-4">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        Pembayaran listrik <span class="text-purple-600">{{ $billingTypeDisplay }}</span>
+                    </h2>
+                    <p class="text-gray-700 mb-2">Pilih salah satu daya yang cocok buatmu di bawah ini.</p>
+
+                    <!-- Nominal Options -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <button onclick="selectToken(this, 'Rp20.000', '13.63', 'teal-5')" class="token-btn bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg">
+                            <p class="text-lg font-bold">Rp20.000</p>
+                            <p class="text-sm opacity-90">13.63 kWh</p>
+                        </button>
+                        <button onclick="selectToken(this, 'Rp50.000', '34.09', 'teal-4')" class="token-btn bg-gradient-to-br from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg">
+                            <p class="text-lg font-bold">Rp50.000</p>
+                            <p class="text-sm opacity-90">34.09 kWh</p>
+                        </button>
+                        <button onclick="selectToken(this, 'Rp100.000', '68.18', 'cyan-4')" class="token-btn bg-gradient-to-br from-cyan-400 to-cyan-500 hover:from-cyan-500 hover:to-cyan-600 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg">
+                            <p class="text-lg font-bold">Rp100.000</p>
+                            <p class="text-sm opacity-90">68.18 kWh</p>
+                        </button>
+                        <button onclick="selectToken(this, 'Rp200.000', '136.36', 'cyan-5')" class="token-btn bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg">
+                            <p class="text-lg font-bold">Rp200.000</p>
+                            <p class="text-sm opacity-90">136.36 kWh</p>
+                        </button>
+                        <button onclick="selectToken(this, 'Rp500.000', '340.45', 'purple')" class="token-btn bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg">
+                            <p class="text-lg font-bold">Rp500.000</p>
+                            <p class="text-sm opacity-90">340.45 kWh</p>
+                        </button>
+                        <button onclick="selectToken(this, 'Rp1.000.000', '680.90', 'pink')" class="token-btn bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-2xl p-4 text-left transition-all shadow-md hover:shadow-lg ring-4 ring-pink-300">
+                            <p class="text-lg font-bold">Rp1.000.000</p>
+                            <p class="text-sm opacity-90">680.90 kWh</p>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <!-- Selected Amount & Payment Methods -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 bg-white rounded-3xl overflow-hidden">
+                        <!-- Daya Terpilih -->
+                        <div id="selectedCard" class="bg-gradient-to-br from-cyan-400 to-cyan-500 p-6 text-white rounded-tl-2xl rounded-tr-2xl lg:rounded-tr-none">
+                            <p class="text-xl font-bold mb-4">Daya terpilih</p>
+                            <h2 id="selectedAmount" class="text-4xl font-bold">Rp100.000</h2>
+                            <p id="selectedKwh" class="text-lg">68.18 kWh</p>
+                            <p class="text-lg mt-4">Metode Pembayaran:</p>
+                            <h3 id="selectedPaymentMethod" class="text-2xl font-semibold"></h3>
+                        </div>
+                        
+                        <!-- Payment Methods -->
+                        <div class="rounded-2xl p-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Pembayaran menggunakan</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <button class="payment-method-btn bg-[#9db33f] hover:bg-[#8da035] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'QRIS')">QRIS</button>
+                                <button class="payment-method-btn bg-[#0da5a5] hover:bg-[#0c9393] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'm-Bank')">m-Bank</button>
+                                <button class="payment-method-btn bg-[#1a8bc9] hover:bg-[#1679b3] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'GoPay')">GoPay</button>
+                                <button class="payment-method-btn bg-[#ff6b1a] hover:bg-[#e65f17] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'ShopeePay')">ShopeePay</button>
+                                <button class="payment-method-btn bg-[#6b4ab5] hover:bg-[#5e40a0] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Kredit/debit')">Kredit/debit</button>
+                                <button class="payment-method-btn bg-[#3fb562] hover:bg-[#36a055] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Virtual Account')">Virtual Account</button>
+                                <button class="payment-method-btn bg-[#c94444] hover:bg-[#b33d3d] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Alfamart')">Alfamart</button>
+                                <button class="payment-method-btn bg-[#4a9fd8] hover:bg-[#428ec4] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Indomaret')">Indomaret</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- PASCABAYAR VIEW -->
+                <div class="bg-[#eaeff4] rounded-3xl p-4">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">
+                        Pembayaran listrik <span class="text-purple-600">{{ $billingTypeDisplay }}</span>
+                    </h2>
+                    <p class="text-gray-700 mb-4">
+                        Pembayaran sebesar <span class="text-2xl font-bold text-purple-600">Rp {{ number_format($billData['totalCost'] ?? 0, 0, ',', '.') }}</span>
+                    </p>
+
+                    @if($billData)
+                        <!-- Bill Details -->
+                        <div class="bg-white rounded-2xl p-6 mb-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Detail Tagihan</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Periode</span>
+                                    <span class="font-semibold text-gray-900">{{ $billData['period'] ?? '-' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Total kWh</span>
+                                    <span class="font-semibold text-gray-900">{{ number_format($billData['totalKwh'] ?? 0, 2) }} kWh</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Tarif per kWh</span>
+                                    <span class="font-semibold text-gray-900">Rp {{ number_format($billData['tarifPerKwh'] ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="border-t pt-3 mt-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-gray-900">Total Tagihan</span>
+                                        <span class="text-2xl font-bold text-purple-600">Rp {{ number_format($billData['totalCost'] ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Payment Methods -->
+                    <div class="bg-white rounded-3xl p-4">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Pembayaran menggunakan</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <button class="payment-method-btn bg-[#9db33f] hover:bg-[#8da035] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'QRIS')">QRIS</button>
+                            <button class="payment-method-btn bg-[#0da5a5] hover:bg-[#0c9393] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'm-Bank')">m-Bank</button>
+                            <button class="payment-method-btn bg-[#1a8bc9] hover:bg-[#1679b3] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'GoPay')">GoPay</button>
+                            <button class="payment-method-btn bg-[#ff6b1a] hover:bg-[#e65f17] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'ShopeePay')">ShopeePay</button>
+                            <button class="payment-method-btn bg-[#6b4ab5] hover:bg-[#5e40a0] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Kredit/debit')">Kredit/debit</button>
+                            <button class="payment-method-btn bg-[#3fb562] hover:bg-[#36a055] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Virtual Account')">Virtual Account</button>
+                            <button class="payment-method-btn bg-[#c94444] hover:bg-[#b33d3d] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Alfamart')">Alfamart</button>
+                            <button class="payment-method-btn bg-[#4a9fd8] hover:bg-[#428ec4] text-white rounded-2xl px-6 py-4 font-semibold transition-colors shadow-md" onclick="selectPaymentMethod(this, 'Indomaret')">Indomaret</button>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 mb-2">Metode Pembayaran Terpilih:</p>
+                            <h3 id="selectedPaymentMethod" class="text-xl font-bold text-gray-900"></h3>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Lanjut Pembayaran Button -->
+        <div class="flex justify-center">
+            <button class="bg-white hover:bg-gray-50 transition-colors rounded-full p-4 flex items-center gap-3 font-bold text-gray-900 mt-4 shadow-md hover:shadow-xl" onclick="handleProceedPayment()">
+                Lanjut pembayaran
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-6 h-6">
+                    <circle cx="12" cy="12" r="12" fill="#000000" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" stroke="#FFFFFF" d="M10 7.5l5 4.5-5 4.5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <script>
+const colorMap = {
+    'teal-5': 'from-teal-500 to-teal-600',
+    'teal-4': 'from-teal-400 to-teal-500',
+    'cyan-4': 'from-cyan-400 to-cyan-500',
+    'cyan-5': 'from-cyan-500 to-cyan-600',
+    'purple': 'from-purple-500 to-purple-600',
+    'pink': 'from-pink-500 to-pink-600'
+};
+const ringMap = {
+    'teal-5': 'ring-teal-300',
+    'teal-4': 'ring-teal-300',
+    'cyan-4': 'ring-cyan-300',
+    'cyan-5': 'ring-cyan-300',
+    'purple': 'ring-purple-300',
+    'pink': 'ring-pink-300'
+};
+function selectToken(btn, amt, kwh, color) {
+    document.querySelectorAll('.token-btn').forEach(b => {
+        b.classList.remove('ring-4', 'ring-teal-300', 'ring-cyan-300', 'ring-purple-300', 'ring-pink-300');
+    });
+    btn.classList.add('ring-4', ringMap[color]);
+    const card = document.getElementById('selectedCard');
+    card.className = 'rounded-tl-2xl rounded-tr-2xl lg:rounded-tr-none p-6 text-white shadow-lg transition-all duration-300 bg-gradient-to-br ' + colorMap[color];
+    document.getElementById('selectedAmount').textContent = amt;
+    document.getElementById('selectedKwh').textContent = kwh + ' kWh';
+}
+function selectPaymentMethod(btn, method) {
+    document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('ring-4', 'ring-lime-300', 'ring-teal-300', 'ring-cyan-300', 'ring-purple-300', 'ring-pink-300', 'ring-blue-300', 'ring-orange-300', 'ring-red-300'));
+    btn.classList.add('ring-4', 'ring-lime-300');
+    document.getElementById('selectedPaymentMethod').textContent = method;
+}
+function handleProceedPayment() {
+    const method = document.getElementById('selectedPaymentMethod').textContent;
+    if (!method) {
+        const grid = document.querySelector('.grid.grid-cols-1.lg\\:grid-cols-2.bg-white.rounded-3xl.overflow-hidden');
+        if (grid) {
+            const originalBg = grid.style.background;
+            grid.style.transition = 'background 0.2s';
+            grid.style.background = '#c0c0c0';
+            setTimeout(() => {
+                grid.style.background = originalBg;
+            }, 400);
+        }
+        return false;
+    }
+    
+    // Get payment details
+    const amount = document.getElementById('selectedAmount')?.textContent || '';
+    const kwh = document.getElementById('selectedKwh')?.textContent || '';
+    
+    // Build URL with query parameters
+    const params = new URLSearchParams({
+        method: method,
+        amount: amount,
+        kwh: kwh
+    });
+    
+    window.location.href = '/pembayaran/lanjut?' + params.toString();
+}
+</script>
+    <!-- Mobile Bottom Navigation -->
+    <x-bottom-navigation />
+    {{-- <footer class="mt-10 py-6 bg-white text-center shadow-md">
+        <p class="text-gray-600">&copy; 2025 Brand. All rights reserved.</p>
+    </footer> --}}
+</body>
+
+</html>
